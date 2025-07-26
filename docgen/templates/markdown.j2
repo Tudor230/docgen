@@ -1,0 +1,9 @@
+{% for route in routes %}
+## {{ route.method }} {{ route.path }}
+
+**Middlewares:** {{ route.middlewares | join(', ') if route.middlewares else 'None' }}
+
+{{ route.description or 'No description provided.' }}
+
+---
+{% endfor %}
