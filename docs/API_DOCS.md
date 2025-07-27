@@ -1,9 +1,9 @@
 
-## POST /users
+## GET /users
 
-**Middlewares:** None
+**Middlewares:** authMiddleware
 
-Get list of users
+No description provided.
 
 ---
 
@@ -11,6 +11,6 @@ Get list of users
 
 **Middlewares:** None
 
-Create a new user
+No description provided.
 
 ---

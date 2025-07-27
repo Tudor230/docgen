@@ -24,25 +24,40 @@ def extract_routes_from_ast(tree):
     for node in ast.walk(tree):
         if isinstance(node, ast.FunctionDef):
             docstring = ast.get_docstring(node)
+
+            route_decorator = None
+            middlewares = []
+
             for decorator in node.decorator_list:
-                if isinstance(decorator, ast.Call) and hasattr(decorator.func, "attr") and decorator.func.attr == "route":
-                    # Extract path
-                    path_arg = decorator.args[0] if decorator.args else None
-                    route_path = path_arg.value if isinstance(path_arg, ast.Constant) and isinstance(path_arg.value, str) else "<unknown>"
+                if (
+                    isinstance(decorator, ast.Call)
+                    and hasattr(decorator.func, "attr")
+                    and decorator.func.attr == "route"
+                ):
+                    route_decorator = decorator
+                else:
+                    if isinstance(decorator, ast.Name):
+                        middlewares.append(decorator.id)
+                    elif isinstance(decorator, ast.Attribute):
+                        middlewares.append(decorator.attr)
 
-                    # Extract methods
-                    method_list = ["GET"]  # default in Flask
+            if not route_decorator:
+                continue
 
-                    for keyword in decorator.keywords:
-                        if keyword.arg == "methods" and isinstance(keyword.value, ast.List):
-                            method_list = [elt.value for elt in keyword.value.elts if isinstance(elt, ast.Constant) and isinstance(elt.value, str)]
+            path_arg = route_decorator.args[0] if route_decorator.args else None
+            route_path = (path_arg.value if isinstance(path_arg, ast.Constant) and isinstance(path_arg.value, str) else "<unknown>")
 
-                    for method in method_list:
-                        routes.append({
-                            "method": method,
-                            "path": route_path,
-                            "description": docstring or "",
-                            "middlewares": []
-                        })
+            method_list = ["GET"]
+            for keyword in route_decorator.keywords:
+                if keyword.arg == "methods" and isinstance(keyword.value, ast.List):
+                    method_list = [elt.value for elt in keyword.value.elts if isinstance(elt, ast.Constant) and isinstance(elt.value, str)]
+
+            for method in method_list:
+                routes.append({
+                    "method": method,
+                    "path": route_path,
+                    "description": docstring or "",
+                    "middlewares": middlewares
+                })
 
     return routes
