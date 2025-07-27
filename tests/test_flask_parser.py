@@ -103,3 +103,32 @@ def dashboard():
         assert route["path"] == "/dashboard"
         assert route["description"] == "Protected dashboard"
         assert "login_required" in route["middlewares"]
+
+def test_flask_route_with_multiple_middlewares():
+    source = '''
+from flask import Flask
+app = Flask(__name__)
+
+def login_required(f): return f
+def audit(f): return f
+
+@app.route("/admin")
+@login_required
+@audit
+def admin_panel():
+    """Admin panel"""
+    return "Admin view"
+'''
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        app_path = Path(tmpdir) / "admin.py"
+        app_path.write_text(source)
+
+        routes = parser.parse_api(tmpdir)
+
+        assert len(routes) == 1
+        route = routes[0]
+        assert route["method"] == "GET"
+        assert route["path"] == "/admin"
+        assert route["description"] == "Admin panel"
+        assert set(route["middlewares"]) == {"login_required", "audit"}

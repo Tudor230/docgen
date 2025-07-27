@@ -40,6 +40,13 @@ def extract_routes_from_ast(tree):
                         middlewares.append(decorator.id)
                     elif isinstance(decorator, ast.Attribute):
                         middlewares.append(decorator.attr)
+                    elif isinstance(decorator, ast.Call):
+                        # For decorators like @rate_limit(10)
+                        func = decorator.func
+                        if isinstance(func, ast.Name):
+                            middlewares.append(func.id)
+                        elif isinstance(func, ast.Attribute):
+                            middlewares.append(func.attr)
 
             if not route_decorator:
                 continue
