@@ -132,3 +132,61 @@ def admin_panel():
         assert route["path"] == "/admin"
         assert route["description"] == "Admin panel"
         assert set(route["middlewares"]) == {"login_required", "audit"}
+
+def test_flask_blueprint_nested():
+    source = '''
+from flask import Blueprint
+
+bp = Blueprint("test", __name__)
+
+@bp.route("/nested")
+def nested_view():
+    """Nested route"""
+    return "OK"
+'''
+    with tempfile.TemporaryDirectory() as tmpdir:
+        nested = Path(tmpdir) / "routes"
+        nested.mkdir()
+        (nested / "nested.py").write_text(source)
+
+        routes = parser.parse_api(tmpdir)
+
+        assert any(r["path"] == "/nested" and r["description"] == "Nested route" for r in routes)
+
+def test_flask_decorator_with_args():
+    source = '''
+from flask import Flask
+app = Flask(__name__)
+
+def rate_limit(n):
+    def wrapper(f): return f
+    return wrapper
+
+@app.route("/limited")
+@rate_limit(10)
+def limited():
+    """Limited route"""
+    return "OK"
+'''
+    with tempfile.TemporaryDirectory() as tmpdir:
+        (Path(tmpdir) / "app.py").write_text(source)
+        routes = parser.parse_api(tmpdir)
+
+        r = routes[0]
+        assert "rate_limit" in r["middlewares"]
+
+def test_flask_dynamic_route_path():
+    source = '''
+from flask import Flask
+app = Flask(__name__)
+
+@app.route("/user/<int:id>")
+def user_profile(id):
+    """Get user by ID"""
+    return "OK"
+'''
+    with tempfile.TemporaryDirectory() as tmpdir:
+        (Path(tmpdir) / "app.py").write_text(source)
+        routes = parser.parse_api(tmpdir)
+
+        assert routes[0]["path"] == "/user/<int:id>"

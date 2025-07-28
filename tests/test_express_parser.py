@@ -49,3 +49,72 @@ def test_express_nested_directories():
 
         routes = parser.parse_api(tmpdir)
         assert any(r["path"] == "/profile" for r in routes)
+
+def test_express_multiple_middlewares():
+    source = """
+const express = require('express');
+const app = express();
+
+function auth(req, res, next) { next(); }
+function log(req, res, next) { next(); }
+function handler(req, res) { res.send("OK"); }
+
+app.get("/secure", auth, log, handler);
+"""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        (Path(tmpdir) / "app.js").write_text(source)
+        routes = parser.parse_api(tmpdir)
+
+        route = routes[0]
+        assert route["path"] == "/secure"
+        assert set(route["middlewares"]) == {"auth", "log"}
+
+def test_express_router_chain():
+    source = """
+const express = require('express');
+const router = express.Router();
+
+function getHandler(req, res) { res.send("GET"); }
+function postHandler(req, res) { res.send("POST"); }
+
+router.route("/resource")
+  .get(getHandler)
+  .post(postHandler);
+"""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        (Path(tmpdir) / "routes.js").write_text(source)
+        routes = parser.parse_api(tmpdir)
+
+        methods = {r["method"] for r in routes}
+        assert methods == {"GET", "POST"}
+        assert all(r["path"] == "/resource" for r in routes)
+
+def test_express_with_jsdoc_comment():
+    source = """
+const express = require('express');
+const app = express();
+
+/**
+ * Returns current user info
+ */
+app.get("/me", (req, res) => res.send("Me"));
+"""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        (Path(tmpdir) / "me.js").write_text(source)
+        routes = parser.parse_api(tmpdir)
+
+        route = routes[0]
+        assert route["description"].strip() == "Returns current user info"
+
+def test_express_dynamic_path():
+    source = """
+const express = require('express');
+const app = express();
+
+app.get("/user/:id", (req, res) => res.send("User"));
+"""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        (Path(tmpdir) / "app.js").write_text(source)
+        routes = parser.parse_api(tmpdir)
+
+        assert routes[0]["path"] == "/user/:id"
