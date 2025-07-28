@@ -11,7 +11,7 @@ Get all users from the system
 **Tags:**`Users`, `Admin`
 
 
-**Middlewares:** None
+**Middlewares:** rate_limit
 
 
 
@@ -69,7 +69,7 @@ v1.0.0
 
 ---
 
-## GET /users/:id
+## GET /users/<int:user_id>
 
 
 **Summary:** Get current user profile
@@ -84,7 +84,7 @@ v1.0.0
 **Tags:**`Users`
 
 
-**Middlewares:** None
+**Middlewares:** auth_required
 
 
 
@@ -99,7 +99,7 @@ v1.0.0
 **Param:**
 
 
-- {string} id.path.required - User ID
+- {string} user_id.path.required - User ID
 
 - {string} Authorization.header.required - Bearer token
 
@@ -162,7 +162,7 @@ Create a new user account
 **Tags:**`Users`, `Authentication`
 
 
-**Middlewares:** None
+**Middlewares:** rate_limit
 
 
 
@@ -250,7 +250,7 @@ v1.0.0
 
 ---
 
-## PUT /users/:id
+## PUT /users/<int:user_id>
 
 
 **Summary:** Update user details
@@ -265,7 +265,7 @@ Update user profile information
 **Tags:**`Users`, `Profile`, `Admin`
 
 
-**Middlewares:** None
+**Middlewares:** auth_required, admin_required
 
 
 
@@ -278,7 +278,7 @@ Update user profile information
 **Param:**
 
 
-- {string} id.path.required - User ID to update
+- {string} user_id.path.required - User ID to update
 
 - {string} name.body - Updated name
 
@@ -343,7 +343,7 @@ v1.1.0
 
 ---
 
-## DELETE /orders/:id
+## DELETE /orders/<int:order_id>
 
 
 **Summary:** Delete order permanently
@@ -358,7 +358,7 @@ v1.1.0
 **Tags:**`Orders`, `Admin`, `Audit`
 
 
-**Middlewares:** None
+**Middlewares:** admin_required, rate_limit
 
 
 
@@ -373,7 +373,7 @@ v1.1.0
 **Param:**
 
 
-- {string} id.path.required - Order ID to delete
+- {string} order_id.path.required - Order ID to delete
 
 - {string} reason.body - Reason for deletion
 
@@ -397,7 +397,7 @@ v1.1.0
 **Example:**
 
 
-- DELETE /orders/ord_123
+- DELETE /orders/123
 
 - {"reason": "Customer requested cancellation"}
 
@@ -534,7 +534,7 @@ Uptime check endpoint
 
 ---
 
-## POST /products
+## GET /api/products
 
 
 **Summary:** Manage product catalog
@@ -552,7 +552,7 @@ Product management endpoints
 **Tags:**`Products`, `Inventory`, `Catalog`
 
 
-**Middlewares:** None
+**Middlewares:** rate_limit
 
 
 
@@ -626,18 +626,99 @@ GET /api/products?category=electronics&active=true
 
 ---
 
-## GET /products
+## POST /api/products
+
+
+**Summary:** Manage product catalog
+
+
+
+Product management endpoints
+
+
+
+**Description:** Complete CRUD operations for product management including inventory tracking and catalog updates.
+
+
+
+**Tags:**`Products`, `Inventory`, `Catalog`
+
+
+**Middlewares:** rate_limit
 
 
 
 
 
-**Middlewares:** None
+
+
+
+
+
+
+**Param:**
+
+
+- {string} category.query - Filter by product category
+
+- {boolean} active.query - Filter by active status
+
+
+
+
+
+
+**Returns:**
+
+{array} 200 - Array of products
+
+
+
+
+
+**Example:**
+
+GET /api/products?category=electronics&active=true
+
+
+
+
+
+**Cache:**
+
+5 minutes
+
+
+
+
+
+**Ratelimit:**
+
+100 requests per minute
+
+
+
+
+
+**Version:**
+
+2.1.0
+
+
+
+
+
+**See:**
+
+/api/categories for available categories
+
+
+
 
 
 ---
 
-## POST /upload
+## POST /api/upload
 
 
 **Summary:** Upload user files
@@ -652,7 +733,7 @@ File upload endpoint
 **Tags:**`Files`, `Upload`
 
 
-**Middlewares:** None
+**Middlewares:** auth_required, rate_limit
 
 
 
@@ -688,7 +769,7 @@ File upload endpoint
 
 **Example:**
 
-POST /upload
+POST /api/upload
 
 
 
@@ -718,17 +799,104 @@ AWS S3
 
 
 
-**Virus-Scan:**
-
-Enabled
-
-
-
-
-
 **Retention:**
 
 7 years
+
+
+
+
+
+---
+
+## GET /api/search
+
+
+**Summary:** Global search functionality
+
+
+
+Search across all resources
+
+
+
+
+**Tags:**`Search`, `Query`
+
+
+**Middlewares:** rate_limit
+
+
+
+
+
+
+
+
+
+**Param:**
+
+
+- {string} q.query.required - Search query
+
+- {string} type.query - Resource type filter
+
+- {number} page.query - Page number (default: 1)
+
+- {number} per_page.query - Results per page (default: 20)
+
+
+
+
+
+
+**Returns:**
+
+
+- {object} 200 - Search results
+
+- {object} 400 - Invalid query
+
+
+
+
+
+
+**Example:**
+
+GET /api/search?q=python&type=users&page=1
+
+
+
+
+
+**Performance:**
+
+Elasticsearch backend
+
+
+
+
+
+**Indexing:**
+
+Real-time updates
+
+
+
+
+
+**Relevance:**
+
+Machine learning scoring
+
+
+
+
+
+**Analytics:**
+
+Search queries logged
 
 
 

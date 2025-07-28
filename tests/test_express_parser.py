@@ -118,3 +118,88 @@ app.get("/user/:id", (req, res) => res.send("User"));
         routes = parser.parse_api(tmpdir)
 
         assert routes[0]["path"] == "/user/:id"
+
+def test_express_jsdoc_tags_and_summary():
+    source = """
+const express = require('express');
+const app = express();
+
+/**
+ * @tags Users
+ * @summary Get current user
+ * Returns current user info.
+ */
+app.get("/me", (req, res) => res.send("Me"));
+"""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        (Path(tmpdir) / "app.js").write_text(source)
+        routes = parser.parse_api(tmpdir)
+
+        assert len(routes) == 1
+        route = routes[0]
+
+        assert route["method"] == "GET"
+        assert route["path"] == "/me"
+        assert "Returns current user info" in route["description"]
+
+        assert "metadata" in route
+        assert route["metadata"]["tags"] == "Users"
+        assert route["metadata"]["summary"] == "Get current user"
+
+def test_express_jsdoc_multiline_description():
+    source = """
+const express = require('express');
+const app = express();
+
+/**
+ * @tags Auth
+ * @summary Login
+ * This route handles login.
+ * It validates user credentials and returns a token.
+ */
+app.post("/login", (req, res) => res.send("Login"));
+"""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        (Path(tmpdir) / "app.js").write_text(source)
+        routes = parser.parse_api(tmpdir)
+
+        route = routes[0]
+        desc = route["description"]
+
+        assert "handles login" in desc
+        assert "returns a token" in desc
+        assert route["metadata"]["tags"] == "Auth"
+        assert route["metadata"]["summary"] == "Login"
+
+def test_express_multiple_param_raw():
+    source = """
+const express = require('express');
+const app = express();
+
+/**
+ * @summary Update a user
+ * @tags Users
+ * @param {string} id.path.required - The user ID
+ * @param {object} body.body.required - Payload to update
+ * @returns {object} 200 - Updated user
+ */
+app.put("/users/:id", (req, res) => res.send("Updated"));
+"""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        (Path(tmpdir) / "app.js").write_text(source)
+        routes = parser.parse_api(tmpdir)
+
+        assert len(routes) == 1
+        route = routes[0]
+
+        metadata = route.get("metadata", {})
+        assert "param" in metadata
+        assert isinstance(metadata["param"], list)
+        assert len(metadata["param"]) == 2
+
+        assert any("id.path.required" in p for p in metadata["param"])
+        assert any("body.body.required" in p for p in metadata["param"])
+
+        assert "returns" in metadata
+        assert isinstance(metadata["returns"], str)
+        assert "200" in metadata["returns"]

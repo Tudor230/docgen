@@ -1,9 +1,75 @@
 {% for route in routes %}
 ## {{ route.method }} {{ route.path }}
 
+{% if route.metadata.summary %}
+**Summary:** {{ route.metadata.summary }}
+
+{% endif %}
+{% if route.description %}
+{{ route.description }}
+
+{% endif %}
+{% if route.metadata.description and route.metadata.description != route.description %}
+**Description:** {{ route.metadata.description }}
+
+{% endif %}
+{% if route.metadata.tags or route.metadata.tag %}
+**Tags:** 
+{%- set all_tags = [] -%}
+{%- if route.metadata.tags -%}
+  {%- if route.metadata.tags is string -%}
+    {%- set tag_list = route.metadata.tags.split(',') -%}
+    {%- for tag in tag_list -%}
+      {%- set _ = all_tags.append(tag.strip()) -%}
+    {%- endfor -%}
+  {%- elif route.metadata.tags is iterable -%}
+    {%- for tag in route.metadata.tags -%}
+      {%- if tag is string and ',' in tag -%}
+        {%- set tag_list = tag.split(',') -%}
+        {%- for subtag in tag_list -%}
+          {%- set _ = all_tags.append(subtag.strip()) -%}
+        {%- endfor -%}
+      {%- else -%}
+        {%- set _ = all_tags.append(tag.strip()) -%}
+      {%- endif -%}
+    {%- endfor -%}
+  {%- else -%}
+    {%- set _ = all_tags.append(route.metadata.tags) -%}
+  {%- endif -%}
+{%- endif -%}
+{%- if route.metadata.tag -%}
+  {%- if route.metadata.tag is string -%}
+    {%- set _ = all_tags.append(route.metadata.tag) -%}
+  {%- elif route.metadata.tag is iterable -%}
+    {%- for tag in route.metadata.tag -%}
+      {%- set _ = all_tags.append(tag) -%}
+    {%- endfor -%}
+  {%- endif -%}
+{%- endif -%}
+{% for tag in all_tags %}`{{ tag }}`{% if not loop.last %}, {% endif %}{% endfor %}
+
+{% endif %}
 **Middlewares:** {{ route.middlewares | join(', ') if route.middlewares else 'None' }}
 
-{{ route.description or 'No description provided.' }}
+{% if route.metadata %}
+{% set special_fields = ['summary', 'description', 'tags', 'tag'] %}
+{% for key, value in route.metadata.items() %}
+{% if key not in special_fields %}
+**{{ key.title() }}:**
+{% if value is string %}
+{{ value }}
 
+{% elif value is iterable %}
+{% for item in value %}
+- {{ item }}
+{% endfor %}
+
+{% else %}
+{{ value }}
+
+{% endif %}
+{% endif %}
+{% endfor %}
+{% endif %}
 ---
 {% endfor %}

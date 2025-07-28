@@ -1,6 +1,36 @@
 import ast
 import os
 from pathlib import Path
+import re
+
+def extract_metadata_from_docstring(docstring):
+    if not docstring:
+        return "", {}
+
+    lines = docstring.strip().split("\n")
+    description_lines = []
+    metadata = {}
+
+    for line in lines:
+        stripped = line.strip()
+        if stripped.startswith("@"):
+            match = re.match(r"@(\w+)\s+(.*)", stripped)
+            if match:
+                key, value = match.groups()
+                key = key.strip()
+                value = value.strip()
+                if key in metadata:
+                    if isinstance(metadata[key], list):
+                        metadata[key].append(value)
+                    else:
+                        metadata[key] = [metadata[key], value]
+                else:
+                    metadata[key] = value
+        else:
+            description_lines.append(stripped)
+
+    description = " ".join(description_lines)
+    return description.strip(), metadata
 
 def parse_api(input_path):
     routes = []
@@ -23,7 +53,8 @@ def extract_routes_from_ast(tree):
 
     for node in ast.walk(tree):
         if isinstance(node, ast.FunctionDef):
-            docstring = ast.get_docstring(node)
+            raw_docstring = ast.get_docstring(node)
+            description, metadata = extract_metadata_from_docstring(raw_docstring)
 
             route_decorator = None
             middlewares = []
@@ -63,8 +94,9 @@ def extract_routes_from_ast(tree):
                 routes.append({
                     "method": method,
                     "path": route_path,
-                    "description": docstring or "",
-                    "middlewares": middlewares
+                    "middlewares": middlewares,
+                    "metadata": metadata,
+                    "description": description,
                 })
 
     return routes

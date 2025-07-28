@@ -3,23 +3,44 @@ const path = require("path");
 const parser = require("@babel/parser");
 const traverse = require("@babel/traverse").default;
 
-function extractDescription(path) {
-  const parentComments = path.parent && path.parent.leadingComments;
+function extractCommentMetadata(path) {
+  const comments = path.node.leadingComments || path.parent?.leadingComments;
+  if (!comments || comments.length === 0)
+    return { description: "", metadata: {} };
 
-  const comments = parentComments;
-  if (!comments || comments.length === 0) return "";
-
-  const comment = comments[comments.length - 1];
-  if (!comment || !comment.value) return "";
-
-  const value = comment.value;
-
-  return value
+  const last = comments[comments.length - 1];
+  const lines = last.value
     .split("\n")
     .map((line) => line.replace(/^\s*\*\s?/, "").trim())
-    .filter((line) => line.length > 0)
-    .join(" ")
-    .trim();
+    .filter((line) => line.length > 0);
+
+  let descriptionLines = [];
+  let metadata = {};
+
+  for (const line of lines) {
+    if (line.startsWith("@")) {
+      const [tag, ...rest] = line.split(" ");
+      const key = tag.slice(1).trim();
+      const value = rest.join(" ").trim();
+
+      if (metadata[key]) {
+        if (Array.isArray(metadata[key])) {
+          metadata[key].push(value);
+        } else {
+          metadata[key] = [metadata[key], value];
+        }
+      } else {
+        metadata[key] = value;
+      }
+    } else {
+      descriptionLines.push(line);
+    }
+  }
+
+  return {
+    description: descriptionLines.join(" "),
+    metadata,
+  };
 }
 
 function parseFile(filePath) {
@@ -52,13 +73,14 @@ function parseFile(filePath) {
           .slice(1, -1)
           .map((arg) => arg.name || "<anonymous>");
 
-        const description = extractDescription(path);
+        const { description, metadata } = extractCommentMetadata(path);
 
         routes.push({
           method,
           path: routePath,
           description: description || "",
           middlewares,
+          metadata,
         });
       }
 
@@ -95,13 +117,14 @@ function parseFile(filePath) {
             .slice(0, -1)
             .map((arg) => arg.name || "<anonymous>");
 
-          const description = extractDescription(path);
+          const { description, metadata } = extractCommentMetadata(path);
 
           routes.push({
             method,
             path: routePath,
             description: description || "",
             middlewares,
+            metadata,
           });
         }
       }
