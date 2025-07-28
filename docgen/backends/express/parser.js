@@ -4,23 +4,20 @@ const parser = require("@babel/parser");
 const traverse = require("@babel/traverse").default;
 
 function extractDescription(path) {
-  // Comments are usually attached to the parent ExpressionStatement, not the CallExpression
   const parentComments = path.parent && path.parent.leadingComments;
 
-  // Try parent's leading comments first, then node's comments
   const comments = parentComments;
   if (!comments || comments.length === 0) return "";
 
-  const comment = comments[comments.length - 1]; // Get the last comment (closest to the code)
+  const comment = comments[comments.length - 1];
   if (!comment || !comment.value) return "";
 
   const value = comment.value;
 
-  // Clean JSDoc comment: remove leading/trailing *, and trim whitespace
   return value
     .split("\n")
-    .map((line) => line.replace(/^\s*\*\s?/, "").trim()) // Remove leading * from each line
-    .filter((line) => line.length > 0) // Remove empty lines
+    .map((line) => line.replace(/^\s*\*\s?/, "").trim())
+    .filter((line) => line.length > 0)
     .join(" ")
     .trim();
 }
@@ -91,7 +88,6 @@ function parseFile(filePath) {
           current = current.callee.object;
         }
 
-        // Only add route if we found a valid route call
         if (routePath !== "<unknown>") {
           const method = callee.property.name.toUpperCase();
           const args = path.node.arguments;
