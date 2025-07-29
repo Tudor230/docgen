@@ -14,19 +14,14 @@ Get all users from the system
 **Middlewares:** None
 
 
+**Parameters:**
 
 
+- **page** (number) - Page number for pagination
+  - Location: query
 
-
-
-**Param:**
-
-
-- {number} page.query - Page number for pagination
-
-- {number} limit.query - Number of users per page
-
-
+- **limit** (number) - Number of users per page
+  - Location: query
 
 
 
@@ -34,9 +29,16 @@ Get all users from the system
 **Returns:**
 
 
-- {object} 200 - Success response with users array
+- **200** (object) - Success response with users array
 
-- {object} 400 - Invalid parameters
+- **400** (object) - Invalid parameters
+
+
+
+
+
+
+
 
 
 
@@ -87,23 +89,14 @@ v1.0.0
 **Middlewares:** None
 
 
+**Parameters:**
 
 
+- **id** (string) *required* - User ID
+  - Location: path
 
-
-
-
-
-
-
-**Param:**
-
-
-- {string} id.path.required - User ID
-
-- {string} Authorization.header.required - Bearer token
-
-
+- **Authorization** (string) *required* - Bearer token
+  - Location: header
 
 
 
@@ -111,9 +104,20 @@ v1.0.0
 **Returns:**
 
 
-- {object} 200 - User profile object
+- **200** (object) - User profile object
 
-- {object} 404 - User not found
+- **404** (object) - User not found
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -165,23 +169,20 @@ Create a new user account
 **Middlewares:** None
 
 
+**Parameters:**
 
 
+- **email** (string) *required* - User email address
+  - Location: body
 
+- **password** (string) *required* - User password (min 8 characters)
+  - Location: body
 
+- **name** (string) *required* - Full name
+  - Location: body
 
-**Param:**
-
-
-- {string} email.body.required - User email address
-
-- {string} password.body.required - User password (min 8 characters)
-
-- {string} name.body.required - Full name
-
-- {string} role.body - User role (default: user)
-
-
+- **role** (string) - User role (default: user)
+  - Location: body
 
 
 
@@ -189,11 +190,18 @@ Create a new user account
 **Returns:**
 
 
-- {object} 201 - User created successfully
+- **201** (object) - User created successfully
 
-- {object} 400 - Validation error
+- **400** (object) - Validation error
 
-- {object} 409 - Email already exists
+- **409** (object) - Email already exists
+
+
+
+
+
+
+
 
 
 
@@ -268,25 +276,20 @@ Update user profile information
 **Middlewares:** None
 
 
+**Parameters:**
 
 
+- **id** (string) *required* - User ID to update
+  - Location: path
 
+- **name** (string) - Updated name
+  - Location: body
 
+- **email** (string) - Updated email
+  - Location: body
 
-
-
-**Param:**
-
-
-- {string} id.path.required - User ID to update
-
-- {string} name.body - Updated name
-
-- {string} email.body - Updated email
-
-- {object} preferences.body - User preferences object
-
-
+- **preferences** (object) - User preferences object
+  - Location: body
 
 
 
@@ -294,11 +297,20 @@ Update user profile information
 **Returns:**
 
 
-- {object} 200 - User updated successfully
+- **200** (object) - User updated successfully
 
-- {object} 403 - Insufficient permissions
+- **403** (object) - Insufficient permissions
 
-- {object} 404 - User not found
+- **404** (object) - User not found
+
+
+
+
+
+
+
+
+
 
 
 
@@ -361,23 +373,14 @@ v1.1.0
 **Middlewares:** None
 
 
+**Parameters:**
 
 
+- **id** (string) *required* - Order ID to delete
+  - Location: path
 
-
-
-
-
-
-
-**Param:**
-
-
-- {string} id.path.required - Order ID to delete
-
-- {string} reason.body - Reason for deletion
-
-
+- **reason** (string) - Reason for deletion
+  - Location: body
 
 
 
@@ -385,9 +388,20 @@ v1.1.0
 **Returns:**
 
 
-- {object} 200 - Order deleted successfully
+- **200** (object) - Order deleted successfully
 
-- {object} 404 - Order not found
+- **404** (object) - Order not found
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -472,16 +486,17 @@ Get system health and status
 
 
 
-
-
-
-
 **Returns:**
 
 
-- {object} 200 - System status
+- **200** (object) - System status
 
-- {object} 503 - Service unavailable
+- **503** (object) - Service unavailable
+
+
+
+
+
 
 
 
@@ -555,30 +570,34 @@ Product management endpoints
 **Middlewares:** None
 
 
+**Parameters:**
 
 
+- **category** (string) - Filter by product category
+  - Location: query
 
-
-
-
-
-
-
-**Param:**
-
-
-- {string} category.query - Filter by product category
-
-- {boolean} active.query - Filter by active status
-
-
+- **active** (boolean) - Filter by active status
+  - Location: query
 
 
 
 
 **Returns:**
 
-{array} 200 - Array of products
+
+- **200** (array) - Array of products
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -635,6 +654,8 @@ GET /api/products?category=electronics&active=true
 **Middlewares:** None
 
 
+
+
 ---
 
 ## POST /upload
@@ -655,21 +676,14 @@ File upload endpoint
 **Middlewares:** None
 
 
+**Parameters:**
 
 
+- **file** (file) *required* - File to upload
+  - Location: formData
 
-
-
-
-
-**Param:**
-
-
-- {file} file.formData.required - File to upload
-
-- {string} category.formData - File category
-
-
+- **category** (string) - File category
+  - Location: formData
 
 
 
@@ -677,9 +691,18 @@ File upload endpoint
 **Returns:**
 
 
-- {object} 200 - Upload successful
+- **200** (object) - Upload successful
 
-- {object} 413 - File too large
+- **413** (object) - File too large
+
+
+
+
+
+
+
+
+
 
 
 

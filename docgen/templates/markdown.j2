@@ -51,8 +51,25 @@
 {% endif %}
 **Middlewares:** {{ route.middlewares | join(', ') if route.middlewares else 'None' }}
 
+{% if route.metadata.param %}
+**Parameters:**
+
+{% for param in route.metadata.param %}
+- **{{ param.name }}** ({{ param.type }}){% if param.required %} *required*{% endif %} - {{ param.description }}
+  - Location: {{ param.in }}
+{% endfor %}
+
+{% endif %}
+{% if route.metadata.returns %}
+**Returns:**
+
+{% for return in route.metadata.returns %}
+- **{{ return.statusCode }}** ({{ return.type }}) - {{ return.description }}
+{% endfor %}
+
+{% endif %}
 {% if route.metadata %}
-{% set special_fields = ['summary', 'description', 'tags', 'tag'] %}
+{% set special_fields = ['summary', 'description', 'tags', 'tag', 'param', 'returns'] %}
 {% for key, value in route.metadata.items() %}
 {% if key not in special_fields %}
 **{{ key.title() }}:**

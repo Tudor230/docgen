@@ -3,6 +3,37 @@ const path = require("path");
 const parser = require("@babel/parser");
 const traverse = require("@babel/traverse").default;
 
+function parseParamTag(line) {
+  const regex = /@param\s+{(\w+)}\s+(\w+)\.(\w+)(?:\.required)?\s*-\s*(.*)/;
+  const match = line.match(regex);
+  if (!match) return null;
+
+  const [, type, name, location, description] = match;
+  const required = line.includes(".required");
+
+  return {
+    name,
+    in: location,
+    type,
+    required,
+    description: description.trim(),
+  };
+}
+
+function parseReturnsTag(line) {
+  const regex = /@returns\s+{(\w+)}\s+(\d{3})\s*-\s*(.*)/;
+  const match = line.match(regex);
+  if (!match) return null;
+
+  const [, type, statusCode, description] = match;
+
+  return {
+    type,
+    statusCode: parseInt(statusCode),
+    description: description.trim(),
+  };
+}
+
 function extractCommentMetadata(path) {
   const comments = path.node.leadingComments || path.parent?.leadingComments;
   if (!comments || comments.length === 0)
@@ -22,6 +53,24 @@ function extractCommentMetadata(path) {
       const [tag, ...rest] = line.split(" ");
       const key = tag.slice(1).trim();
       const value = rest.join(" ").trim();
+
+      if (key === "param") {
+        const parsed = parseParamTag(line);
+        if (parsed) {
+          if (!metadata[key]) metadata[key] = [];
+          metadata[key].push(parsed);
+          continue;
+        }
+      }
+
+      if (key === "returns") {
+        const parsed = parseReturnsTag(line);
+        if (parsed) {
+          if (!metadata[key]) metadata[key] = [];
+          metadata[key].push(parsed);
+          continue;
+        }
+      }
 
       if (metadata[key]) {
         if (Array.isArray(metadata[key])) {

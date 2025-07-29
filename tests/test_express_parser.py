@@ -171,35 +171,58 @@ app.post("/login", (req, res) => res.send("Login"));
         assert route["metadata"]["tags"] == "Auth"
         assert route["metadata"]["summary"] == "Login"
 
-def test_express_multiple_param_raw():
+def test_express_param_parsing_structured():
     source = """
-const express = require('express');
-const app = express();
+    const express = require('express');
+    const app = express();
 
-/**
- * @summary Update a user
- * @tags Users
- * @param {string} id.path.required - The user ID
- * @param {object} body.body.required - Payload to update
- * @returns {object} 200 - Updated user
- */
-app.put("/users/:id", (req, res) => res.send("Updated"));
-"""
+    /**
+     * @param {string} id.path.required - User ID
+     * @param {object} body.body - Request payload
+     */
+    app.post("/users/:id", (req, res) => res.send("ok"));
+    """
     with tempfile.TemporaryDirectory() as tmpdir:
         (Path(tmpdir) / "app.js").write_text(source)
         routes = parser.parse_api(tmpdir)
 
         assert len(routes) == 1
-        route = routes[0]
-
-        metadata = route.get("metadata", {})
+        metadata = routes[0].get("metadata", {})
         assert "param" in metadata
         assert isinstance(metadata["param"], list)
-        assert len(metadata["param"]) == 2
+        assert metadata["param"][0]["name"] == "id"
+        assert metadata["param"][0]["in"] == "path"
+        assert metadata["param"][0]["required"] is True
+        assert metadata["param"][0]["type"] == "string"
+        assert metadata["param"][0]["description"] == "User ID"
 
-        assert any("id.path.required" in p for p in metadata["param"])
-        assert any("body.body.required" in p for p in metadata["param"])
+def test_express_returns_parsing_structured():
+    source = """
+    const express = require('express');
+    const app = express();
 
+    /**
+     * @returns {object} 200 - Success response
+     * @returns {Error} 404 - User not found
+     */
+    app.get("/users/:id", (req, res) => res.send("ok"));
+    """
+    with tempfile.TemporaryDirectory() as tmpdir:
+        (Path(tmpdir) / "app.js").write_text(source)
+        routes = parser.parse_api(tmpdir)
+
+        assert len(routes) == 1
+        metadata = routes[0].get("metadata", {})
         assert "returns" in metadata
-        assert isinstance(metadata["returns"], str)
-        assert "200" in metadata["returns"]
+        assert isinstance(metadata["returns"], list)
+
+        return_200 = next((r for r in metadata["returns"] if r["statusCode"] == 200), None)
+        return_404 = next((r for r in metadata["returns"] if r["statusCode"] == 404), None)
+
+        assert return_200 is not None
+        assert return_200["type"] == "object"
+        assert "Success" in return_200["description"]
+
+        assert return_404 is not None
+        assert return_404["type"] == "Error"
+        assert "not found" in return_404["description"].lower()
