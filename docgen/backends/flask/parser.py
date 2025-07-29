@@ -3,6 +3,31 @@ import os
 from pathlib import Path
 import re
 
+def parse_param_tag(line):
+    match = re.match(r"@param\s+{(\w+)}\s+(\w+)\.(\w+)(?:\.required)?\s*-\s*(.+)", line)
+    if not match:
+        return None
+    param_type, name, location, description = match.groups()
+    required = ".required" in line
+    return {
+        "name": name,
+        "in": location,
+        "type": param_type,
+        "required": required,
+        "description": description.strip()
+    }
+
+def parse_returns_tag(line):
+    match = re.match(r"@returns\s+{(\w+)}\s+(\d{3})\s*-\s*(.+)", line)
+    if not match:
+        return None
+    return_type, status_code, description = match.groups()
+    return {
+        "type": return_type,
+        "statusCode": int(status_code),
+        "description": description.strip()
+    }
+
 def extract_metadata_from_docstring(docstring):
     if not docstring:
         return "", {}
@@ -14,23 +39,26 @@ def extract_metadata_from_docstring(docstring):
     for line in lines:
         stripped = line.strip()
         if stripped.startswith("@"):
-            match = re.match(r"@(\w+)\s+(.*)", stripped)
+            if stripped.startswith("@param"):
+                parsed = parse_param_tag(stripped)
+                if parsed:
+                    metadata.setdefault("param", []).append(parsed)
+                    continue
+
+            if stripped.startswith("@returns"):
+                parsed = parse_returns_tag(stripped)
+                if parsed:
+                    metadata.setdefault("returns", []).append(parsed)
+                    continue
+
+            match = re.match(r"@(\w+)\s+(.+)", stripped)
             if match:
                 key, value = match.groups()
-                key = key.strip()
-                value = value.strip()
-                if key in metadata:
-                    if isinstance(metadata[key], list):
-                        metadata[key].append(value)
-                    else:
-                        metadata[key] = [metadata[key], value]
-                else:
-                    metadata[key] = value
+                metadata.setdefault(key, value)
         else:
             description_lines.append(stripped)
 
-    description = " ".join(description_lines)
-    return description.strip(), metadata
+    return " ".join(description_lines).strip(), metadata
 
 def parse_api(input_path):
     routes = []

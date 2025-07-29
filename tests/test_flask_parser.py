@@ -190,3 +190,40 @@ def user_profile(id):
         routes = parser.parse_api(tmpdir)
 
         assert routes[0]["path"] == "/user/<int:id>"
+
+def test_flask_param_and_returns_parsing():
+    source = '''
+from flask import Flask
+app = Flask(__name__)
+
+@app.route("/users/<id>", methods=["GET"])
+def get_user():
+    """
+    @summary Fetch a user
+    @tags Users
+    @param {string} id.path.required - User ID
+    @returns {object} 200 - The user object
+    @returns {Error} 404 - Not found
+    """
+    return "user"
+    '''
+    with tempfile.TemporaryDirectory() as tmpdir:
+        app_path = Path(tmpdir) / "app.py"
+        app_path.write_text(source)
+        routes = parser.parse_api(tmpdir)
+
+        assert len(routes) == 1
+        metadata = routes[0]["metadata"]
+
+        assert metadata["tags"] == "Users"
+        assert metadata["summary"] == "Fetch a user"
+        
+        assert isinstance(metadata["param"], list)
+        assert metadata["param"][0]["name"] == "id"
+        assert metadata["param"][0]["in"] == "path"
+        assert metadata["param"][0]["required"] is True
+
+        assert isinstance(metadata["returns"], list)
+        codes = {r["statusCode"] for r in metadata["returns"]}
+        assert 200 in codes
+        assert 404 in codes

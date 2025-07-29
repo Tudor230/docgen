@@ -14,19 +14,14 @@ Get all users from the system
 **Middlewares:** rate_limit
 
 
+**Parameters:**
 
 
+- **page** (number) - Page number for pagination
+  - Location: query
 
-
-
-**Param:**
-
-
-- {number} page.query - Page number for pagination
-
-- {number} limit.query - Number of users per page
-
-
+- **limit** (number) - Number of users per page
+  - Location: query
 
 
 
@@ -34,9 +29,16 @@ Get all users from the system
 **Returns:**
 
 
-- {object} 200 - Success response with users array
+- **200** (object) - Success response with users array
 
-- {object} 400 - Invalid parameters
+- **400** (object) - Invalid parameters
+
+
+
+
+
+
+
 
 
 
@@ -87,23 +89,14 @@ v1.0.0
 **Middlewares:** auth_required
 
 
+**Parameters:**
 
 
+- **user_id** (string) *required* - User ID
+  - Location: path
 
-
-
-
-
-
-
-**Param:**
-
-
-- {string} user_id.path.required - User ID
-
-- {string} Authorization.header.required - Bearer token
-
-
+- **Authorization** (string) *required* - Bearer token
+  - Location: header
 
 
 
@@ -111,9 +104,20 @@ v1.0.0
 **Returns:**
 
 
-- {object} 200 - User profile object
+- **200** (object) - User profile object
 
-- {object} 404 - User not found
+- **404** (object) - User not found
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -122,11 +126,7 @@ v1.0.0
 
 **Example:**
 
-
-- GET /users/123
-
-- Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-
+GET /users/123
 
 
 
@@ -159,29 +159,26 @@ Create a new user account
 
 
 
-**Tags:**`Users`, `Authentication`
+**Tags:**`Users`
 
 
 **Middlewares:** rate_limit
 
 
+**Parameters:**
 
 
+- **email** (string) *required* - User email address
+  - Location: body
 
+- **password** (string) *required* - User password (min 8 characters)
+  - Location: body
 
+- **name** (string) *required* - Full name
+  - Location: body
 
-**Param:**
-
-
-- {string} email.body.required - User email address
-
-- {string} password.body.required - User password (min 8 characters)
-
-- {string} name.body.required - Full name
-
-- {string} role.body - User role (default: user)
-
-
+- **role** (string) - User role (default: user)
+  - Location: body
 
 
 
@@ -189,11 +186,18 @@ Create a new user account
 **Returns:**
 
 
-- {object} 201 - User created successfully
+- **201** (object) - User created successfully
 
-- {object} 400 - Validation error
+- **400** (object) - Validation error
 
-- {object} 409 - Email already exists
+- **409** (object) - Email already exists
+
+
+
+
+
+
+
 
 
 
@@ -202,11 +206,7 @@ Create a new user account
 
 **Example:**
 
-
-- POST /users
-
-- {"email": "user@example.com", "password": "securepass", "name": "John Doe"}
-
+POST /users
 
 
 
@@ -214,11 +214,7 @@ Create a new user account
 
 **Throws:**
 
-
-- {ValidationError} When email format is invalid
-
-- {ConflictError} When email already exists
-
+{ValidationError} When email format is invalid
 
 
 
@@ -268,25 +264,20 @@ Update user profile information
 **Middlewares:** auth_required, admin_required
 
 
+**Parameters:**
 
 
+- **user_id** (string) *required* - User ID to update
+  - Location: path
 
+- **name** (string) - Updated name
+  - Location: body
 
+- **email** (string) - Updated email
+  - Location: body
 
-
-
-**Param:**
-
-
-- {string} user_id.path.required - User ID to update
-
-- {string} name.body - Updated name
-
-- {string} email.body - Updated email
-
-- {object} preferences.body - User preferences object
-
-
+- **preferences** (object) - User preferences object
+  - Location: body
 
 
 
@@ -294,11 +285,20 @@ Update user profile information
 **Returns:**
 
 
-- {object} 200 - User updated successfully
+- **200** (object) - User updated successfully
 
-- {object} 403 - Insufficient permissions
+- **403** (object) - Insufficient permissions
 
-- {object} 404 - User not found
+- **404** (object) - User not found
+
+
+
+
+
+
+
+
+
 
 
 
@@ -307,11 +307,7 @@ Update user profile information
 
 **Example:**
 
-
-- PUT /users/123
-
-- {"name": "John Updated", "preferences": {"theme": "dark"}}
-
+PUT /users/123
 
 
 
@@ -361,23 +357,14 @@ v1.1.0
 **Middlewares:** admin_required, rate_limit
 
 
+**Parameters:**
 
 
+- **order_id** (string) *required* - Order ID to delete
+  - Location: path
 
-
-
-
-
-
-
-**Param:**
-
-
-- {string} order_id.path.required - Order ID to delete
-
-- {string} reason.body - Reason for deletion
-
-
+- **reason** (string) - Reason for deletion
+  - Location: body
 
 
 
@@ -385,9 +372,20 @@ v1.1.0
 **Returns:**
 
 
-- {object} 200 - Order deleted successfully
+- **200** (object) - Order deleted successfully
 
-- {object} 404 - Order not found
+- **404** (object) - Order not found
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -396,11 +394,7 @@ v1.1.0
 
 **Example:**
 
-
-- DELETE /orders/123
-
-- {"reason": "Customer requested cancellation"}
-
+DELETE /orders/123
 
 
 
@@ -465,23 +459,24 @@ Get system health and status
 
 
 
-**Tags:**`System`, `Monitoring`, `Health`
+**Tags:**`System`
 
 
 **Middlewares:** None
 
 
 
-
-
-
-
 **Returns:**
 
 
-- {object} 200 - System status
+- **200** (object) - System status
 
-- {object} 503 - Service unavailable
+- **503** (object) - Service unavailable
+
+
+
+
+
 
 
 
@@ -490,11 +485,7 @@ Get system health and status
 
 **Example:**
 
-
-- GET /health
-
-- Response: {"status": "OK", "uptime": 12345, "version": "1.0.0"}
-
+GET /health
 
 
 
@@ -555,30 +546,34 @@ Product management endpoints
 **Middlewares:** rate_limit
 
 
+**Parameters:**
 
 
+- **category** (string) - Filter by product category
+  - Location: query
 
-
-
-
-
-
-
-**Param:**
-
-
-- {string} category.query - Filter by product category
-
-- {boolean} active.query - Filter by active status
-
-
+- **active** (boolean) - Filter by active status
+  - Location: query
 
 
 
 
 **Returns:**
 
-{array} 200 - Array of products
+
+- **200** (array) - Array of products
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -647,30 +642,34 @@ Product management endpoints
 **Middlewares:** rate_limit
 
 
+**Parameters:**
 
 
+- **category** (string) - Filter by product category
+  - Location: query
 
-
-
-
-
-
-
-**Param:**
-
-
-- {string} category.query - Filter by product category
-
-- {boolean} active.query - Filter by active status
-
-
+- **active** (boolean) - Filter by active status
+  - Location: query
 
 
 
 
 **Returns:**
 
-{array} 200 - Array of products
+
+- **200** (array) - Array of products
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -730,27 +729,20 @@ File upload endpoint
 
 
 
-**Tags:**`Files`, `Upload`
+**Tags:**`Files`
 
 
 **Middlewares:** auth_required, rate_limit
 
 
+**Parameters:**
 
 
+- **file** (file) *required* - File to upload
+  - Location: formData
 
-
-
-
-
-**Param:**
-
-
-- {file} file.formData.required - File to upload
-
-- {string} category.formData - File category
-
-
+- **category** (string) - File category
+  - Location: formData
 
 
 
@@ -758,9 +750,18 @@ File upload endpoint
 **Returns:**
 
 
-- {object} 200 - Upload successful
+- **200** (object) - Upload successful
 
-- {object} 413 - File too large
+- **413** (object) - File too large
+
+
+
+
+
+
+
+
+
 
 
 
@@ -827,25 +828,20 @@ Search across all resources
 **Middlewares:** rate_limit
 
 
+**Parameters:**
 
 
+- **q** (string) *required* - Search query
+  - Location: query
 
+- **type** (string) - Resource type filter
+  - Location: query
 
+- **page** (number) - Page number (default: 1)
+  - Location: query
 
-
-
-**Param:**
-
-
-- {string} q.query.required - Search query
-
-- {string} type.query - Resource type filter
-
-- {number} page.query - Page number (default: 1)
-
-- {number} per_page.query - Results per page (default: 20)
-
-
+- **per_page** (number) - Results per page (default: 20)
+  - Location: query
 
 
 
@@ -853,9 +849,18 @@ Search across all resources
 **Returns:**
 
 
-- {object} 200 - Search results
+- **200** (object) - Search results
 
-- {object} 400 - Invalid query
+- **400** (object) - Invalid query
+
+
+
+
+
+
+
+
+
 
 
 
