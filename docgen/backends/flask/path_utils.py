@@ -70,7 +70,8 @@ def normalize_path_parameters(path: str, framework: str) -> Tuple[str, List[Dict
 def merge_path_params_with_metadata(extracted_params: List[Dict], metadata_params: List[Dict]) -> List[Dict]:
     metadata_lookup = {}
     for param in metadata_params:
-        if param.get('in') == 'path':
+        # Ensure param is a dictionary before processing
+        if isinstance(param, dict) and param.get('in') == 'path':
             metadata_lookup[param['name']] = param
     
     merged_params = []

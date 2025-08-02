@@ -119,11 +119,21 @@ def extract_metadata_from_docstring(docstring):
             match = re.match(r"@(\w+)\s+(.+)", stripped)
             if match:
                 key, value = match.groups()
-                metadata.setdefault(key, value)
+                if key in metadata:
+                    # Handle multiple values for the same key
+                    if isinstance(metadata[key], list):
+                        metadata[key].append(value)
+                    else:
+                        metadata[key] = [metadata[key], value]
+                else:
+                    metadata[key] = value
         else:
-            description_lines.append(stripped)
+            if stripped:  # Only add non-empty lines
+                description_lines.append(stripped)
 
-    return " ".join(description_lines).strip(), metadata
+    # Join description lines with proper spacing
+    description = " ".join(description_lines).strip()
+    return description, metadata
 
 def parse_api(input_path):
     routes = []
@@ -189,8 +199,10 @@ def extract_routes_from_ast(tree):
                 
                 # Merge extracted path params with metadata params
                 original_params = metadata.get("param", [])
-                non_path_params = [p for p in original_params if p.get("in") != "path"]
-                merged_path_params = merge_path_params_with_metadata(extracted_params, original_params)
+                # Filter for valid parameter objects only
+                valid_params = [p for p in original_params if isinstance(p, dict)]
+                non_path_params = [p for p in valid_params if p.get("in") != "path"]
+                merged_path_params = merge_path_params_with_metadata(extracted_params, valid_params)
                 all_params = merged_path_params + non_path_params
 
                 # Update metadata with merged parameters

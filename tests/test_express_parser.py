@@ -319,3 +319,170 @@ router
         assert name_param["required"] is True
         assert price_param["in"] == "body"
         assert price_param["type"] == "number"
+
+def test_express_chained_routes_no_duplication():
+    """Test that chained routes without comments don't create duplicates"""
+    source = """
+const express = require('express');
+const router = express.Router();
+
+router
+  .route("/api/items")
+  .get((req, res) => res.json({ items: [] }))
+  .post((req, res) => res.json({ message: "Created" }))
+  .put((req, res) => res.json({ message: "Updated" }));
+"""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        (Path(tmpdir) / "routes.js").write_text(source)
+        routes = parser.parse_api(tmpdir)
+
+        # Should have exactly 3 routes (no duplicates)
+        assert len(routes) == 3
+        
+        # All routes should have the same path
+        assert all(r["path"] == "/api/items" for r in routes)
+        
+        # Should have GET, POST, and PUT
+        methods = {r["method"] for r in routes}
+        assert methods == {"GET", "POST", "PUT"}
+        
+        # All routes should have empty descriptions since no comments
+        assert all(r["description"] == "" for r in routes)
+        assert all(r["metadata"] == {} for r in routes)
+
+def test_express_chained_routes_with_path_parameters():
+    """Test chained routes with path parameters"""
+    source = """
+const express = require('express');
+const router = express.Router();
+
+/**
+ * User management
+ * @param {string} id.path.required - User ID  
+ */
+router
+  .route("/users/:id")
+  .get((req, res) => res.json({ user: req.params.id }))
+  /**
+   * Update user
+   * @param {string} name.body - User name
+   */
+  .put((req, res) => res.json({ updated: true }));
+"""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        (Path(tmpdir) / "routes.js").write_text(source)
+        routes = parser.parse_api(tmpdir)
+
+        assert len(routes) == 2
+        assert all(r["path"] == "/users/{id}" for r in routes)
+        
+        # Both routes should have the path parameter
+        for route in routes:
+            path_params = [p for p in route["metadata"].get("param", []) if p["in"] == "path"]
+            assert len(path_params) == 1
+            assert path_params[0]["name"] == "id"
+            assert path_params[0]["required"] is True
+
+def test_express_chained_routes_mixed_with_regular():
+    """Test file with both chained and regular routes"""
+    source = """
+const express = require('express');
+const router = express.Router();
+
+/**
+ * Regular route
+ */
+router.get("/regular", (req, res) => res.json({ type: "regular" }));
+
+/**
+ * First chained route
+ */
+router
+  .route("/chained")
+  .get((req, res) => res.json({ type: "chained-get" }))
+  /**
+   * Second chained route  
+   */
+  .post((req, res) => res.json({ type: "chained-post" }));
+
+/**
+ * Another regular route
+ */
+router.delete("/another", (req, res) => res.json({ type: "another" }));
+"""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        (Path(tmpdir) / "routes.js").write_text(source)
+        routes = parser.parse_api(tmpdir)
+
+        assert len(routes) == 4
+        
+        # Regular routes
+        regular_route = next(r for r in routes if r["path"] == "/regular")
+        another_route = next(r for r in routes if r["path"] == "/another")
+        assert regular_route["description"] == "Regular route"
+        assert another_route["description"] == "Another regular route"
+        
+        # Chained routes
+        chained_get = next(r for r in routes if r["path"] == "/chained" and r["method"] == "GET")
+        chained_post = next(r for r in routes if r["path"] == "/chained" and r["method"] == "POST")
+        assert chained_get["description"] == "First chained route"
+        assert chained_post["description"] == "Second chained route"
+
+def test_express_chained_routes_with_middlewares():
+    """Test chained routes with middleware functions"""
+    source = """
+const express = require('express');
+const router = express.Router();
+
+function auth(req, res, next) { next(); }
+function validate(req, res, next) { next(); }
+
+/**
+ * Protected endpoints
+ */
+router
+  .route("/protected")
+  .get(auth, (req, res) => res.json({ data: "secret" }))
+  /**
+   * Create protected resource
+   */
+  .post(auth, validate, (req, res) => res.json({ created: true }));
+"""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        (Path(tmpdir) / "routes.js").write_text(source)
+        routes = parser.parse_api(tmpdir)
+
+        assert len(routes) == 2
+        
+        get_route = next(r for r in routes if r["method"] == "GET")
+        post_route = next(r for r in routes if r["method"] == "POST")
+        
+        assert get_route["middlewares"] == ["auth"]
+        assert post_route["middlewares"] == ["auth", "validate"]
+
+def test_express_chained_routes_malformed_comments():
+    """Test graceful handling of malformed JSDoc comments"""
+    source = """
+const express = require('express');
+const router = express.Router();
+
+/**
+ * Missing closing tag
+ * @param {string name - Malformed param
+ */
+router
+  .route("/test")
+  .get((req, res) => res.json({}))
+  /**
+   * @invalidtag This is not a real tag
+   * @param - Missing type and name
+   */
+  .post((req, res) => res.json({}));
+"""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        (Path(tmpdir) / "routes.js").write_text(source)
+        routes = parser.parse_api(tmpdir)
+
+        # Should still parse routes even with malformed comments
+        assert len(routes) == 2
+        assert all(r["path"] == "/test" for r in routes)

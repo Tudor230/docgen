@@ -163,9 +163,11 @@ function parseFile(filePath) {
               const { normalized_path, extracted_params } =
                 normalizeExpressPath(routePath);
 
-              const originalParams = metadata.param || [];
+              const originalParams = Array.isArray(metadata.param)
+                ? metadata.param
+                : [];
               const nonPathParams = originalParams.filter(
-                (p) => p.in !== "path"
+                (p) => p && typeof p === "object" && p.in !== "path"
               );
               const mergedPathParams = mergePathParamsWithMetadata(
                 extracted_params,

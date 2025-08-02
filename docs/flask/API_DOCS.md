@@ -2,6 +2,9 @@
 ## GET /users
 
 
+**Summary:** Get all users from the system
+
+
 
 Get all users from the system
 
@@ -45,6 +48,8 @@ Get all users from the system
 
 
 
+
+
 **Example:**
 
 GET /users?page=1&limit=10
@@ -71,7 +76,7 @@ v1.0.0
 
 ---
 
-## GET /users/<int:user_id>
+## GET /users/{user_id}
 
 
 **Summary:** Get current user profile
@@ -92,7 +97,7 @@ v1.0.0
 **Parameters:**
 
 
-- **user_id** (string) *required* - User ID
+- **user_id** (integer) *required* - User ID
   - Location: path
 
 - **Authorization** (string) *required* - Bearer token
@@ -126,7 +131,11 @@ v1.0.0
 
 **Example:**
 
-GET /users/123
+
+- GET /users/123
+
+- Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
 
 
 
@@ -159,7 +168,7 @@ Create a new user account
 
 
 
-**Tags:**`Users`
+**Tags:**`Users`, `Authentication`
 
 
 **Middlewares:** rate_limit
@@ -206,7 +215,11 @@ Create a new user account
 
 **Example:**
 
-POST /users
+
+- POST /users
+
+- {"email": "user@example.com", "password": "securepass", "name": "John Doe"}
+
 
 
 
@@ -214,7 +227,11 @@ POST /users
 
 **Throws:**
 
-{ValidationError} When email format is invalid
+
+- {ValidationError} When email format is invalid
+
+- {ConflictError} When email already exists
+
 
 
 
@@ -246,7 +263,7 @@ v1.0.0
 
 ---
 
-## PUT /users/<int:user_id>
+## PUT /users/{user_id}
 
 
 **Summary:** Update user details
@@ -267,7 +284,7 @@ Update user profile information
 **Parameters:**
 
 
-- **user_id** (string) *required* - User ID to update
+- **user_id** (integer) *required* - User ID to update
   - Location: path
 
 - **name** (string) - Updated name
@@ -307,7 +324,11 @@ Update user profile information
 
 **Example:**
 
-PUT /users/123
+
+- PUT /users/123
+
+- {"name": "John Updated", "preferences": {"theme": "dark"}}
+
 
 
 
@@ -339,7 +360,7 @@ v1.1.0
 
 ---
 
-## DELETE /orders/<int:order_id>
+## DELETE /orders/{order_id}
 
 
 **Summary:** Delete order permanently
@@ -360,7 +381,7 @@ v1.1.0
 **Parameters:**
 
 
-- **order_id** (string) *required* - Order ID to delete
+- **order_id** (integer) *required* - Order ID to delete
   - Location: path
 
 - **reason** (string) - Reason for deletion
@@ -394,7 +415,11 @@ v1.1.0
 
 **Example:**
 
-DELETE /orders/123
+
+- DELETE /orders/123
+
+- {"reason": "Customer requested cancellation"}
+
 
 
 
@@ -459,7 +484,7 @@ Get system health and status
 
 
 
-**Tags:**`System`
+**Tags:**`System`, `Monitoring`, `Health`
 
 
 **Middlewares:** None
@@ -485,7 +510,11 @@ Get system health and status
 
 **Example:**
 
-GET /health
+
+- GET /health
+
+- Response: {"status": "OK", "uptime": 12345, "version": "1.0.0"}
+
 
 
 
@@ -729,7 +758,7 @@ File upload endpoint
 
 
 
-**Tags:**`Files`
+**Tags:**`Files`, `Upload`
 
 
 **Middlewares:** auth_required, rate_limit
