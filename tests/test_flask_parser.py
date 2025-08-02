@@ -189,7 +189,7 @@ def user_profile(id):
         (Path(tmpdir) / "app.py").write_text(source)
         routes = parser.parse_api(tmpdir)
 
-        assert routes[0]["path"] == "/user/<int:id>"
+        assert routes[0]["path"] == "/user/{id}"
 
 def test_flask_param_and_returns_parsing():
     source = '''

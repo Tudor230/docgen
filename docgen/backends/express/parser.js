@@ -2,94 +2,44 @@ const fs = require("fs");
 const path = require("path");
 const parser = require("@babel/parser");
 const traverse = require("@babel/traverse").default;
+const {
+  normalizeExpressPath,
+  mergePathParamsWithMetadata,
+  parseParamTag,
+  parseReturnsTag,
+  extractCommentMetadata,
+} = require("./utils");
 
-function parseParamTag(line) {
-  const regex = /@param\s+{(\w+)}\s+(\w+)\.(\w+)(?:\.required)?\s*-\s*(.*)/;
-  const match = line.match(regex);
-  if (!match) return null;
+const HTTP_METHODS = [
+  "get",
+  "post",
+  "put",
+  "delete",
+  "patch",
+  "head",
+  "options",
+];
 
-  const [, type, name, location, description] = match;
-  const required = line.includes(".required");
-
-  return {
-    name,
-    in: location,
-    type,
-    required,
-    description: description.trim(),
-  };
+function isHttpMethod(name) {
+  return HTTP_METHODS.includes(name);
 }
 
-function parseReturnsTag(line) {
-  const regex = /@returns\s+{(\w+)}\s+(\d{3})\s*-\s*(.*)/;
-  const match = line.match(regex);
-  if (!match) return null;
-
-  const [, type, statusCode, description] = match;
-
-  return {
-    type,
-    statusCode: parseInt(statusCode),
-    description: description.trim(),
-  };
-}
-
-function extractCommentMetadata(path) {
-  const comments = path.node.leadingComments || path.parent?.leadingComments;
-  if (!comments || comments.length === 0)
-    return { description: "", metadata: {} };
-
-  const last = comments[comments.length - 1];
-  const lines = last.value
-    .split("\n")
-    .map((line) => line.replace(/^\s*\*\s?/, "").trim())
-    .filter((line) => line.length > 0);
-
-  let descriptionLines = [];
-  let metadata = {};
-
-  for (const line of lines) {
-    if (line.startsWith("@")) {
-      const [tag, ...rest] = line.split(" ");
-      const key = tag.slice(1).trim();
-      const value = rest.join(" ").trim();
-
-      if (key === "param") {
-        const parsed = parseParamTag(line);
-        if (parsed) {
-          if (!metadata[key]) metadata[key] = [];
-          metadata[key].push(parsed);
-          continue;
-        }
-      }
-
-      if (key === "returns") {
-        const parsed = parseReturnsTag(line);
-        if (parsed) {
-          if (!metadata[key]) metadata[key] = [];
-          metadata[key].push(parsed);
-          continue;
-        }
-      }
-
-      if (metadata[key]) {
-        if (Array.isArray(metadata[key])) {
-          metadata[key].push(value);
-        } else {
-          metadata[key] = [metadata[key], value];
-        }
-      } else {
-        metadata[key] = value;
-      }
-    } else {
-      descriptionLines.push(line);
-    }
-  }
-
-  return {
-    description: descriptionLines.join(" "),
-    metadata,
-  };
+/** Pick the correct leading comment block for a method call. */
+function getCommentNodes({ methodPath, isFirstMethod, baseRoutePath }) {
+  // 1. Own leading comments
+  if (methodPath.node.leadingComments?.length)
+    return methodPath.node.leadingComments;
+  // 2. Leading comments of the handler function (last arg) – covers
+  //      router.get("/x",
+  //      /** docs */ (req,res)=>{})
+  const lastArg = methodPath.get("arguments").pop();
+  if (lastArg?.node?.leadingComments?.length)
+    return lastArg.node.leadingComments;
+  // 3. Leading comments of router.route("/x") – only for the *first* method
+  if (isFirstMethod && baseRoutePath.node.leadingComments?.length)
+    return baseRoutePath.node.leadingComments;
+  // Nothing found
+  return [];
 }
 
 function parseFile(filePath) {
@@ -124,12 +74,31 @@ function parseFile(filePath) {
 
         const { description, metadata } = extractCommentMetadata(path);
 
+        // Normalize path parameters
+        const { normalized_path, extracted_params } =
+          normalizeExpressPath(routePath);
+
+        // Merge extracted path params with metadata params
+        const originalParams = metadata.param || [];
+        const nonPathParams = originalParams.filter((p) => p.in !== "path");
+        const mergedPathParams = mergePathParamsWithMetadata(
+          extracted_params,
+          originalParams
+        );
+        const allParams = [...mergedPathParams, ...nonPathParams];
+
+        // Update metadata with merged parameters
+        const updatedMetadata = { ...metadata };
+        if (allParams.length > 0) {
+          updatedMetadata.param = allParams;
+        }
+
         routes.push({
           method,
-          path: routePath,
+          path: normalized_path,
           description: description || "",
           middlewares,
-          metadata,
+          metadata: updatedMetadata,
         });
       }
 
@@ -167,13 +136,28 @@ function parseFile(filePath) {
             .map((arg) => arg.name || "<anonymous>");
 
           const { description, metadata } = extractCommentMetadata(path);
+          const { normalized_path, extracted_params } =
+            normalizeExpressPath(routePath);
+
+          const originalParams = metadata.param || [];
+          const nonPathParams = originalParams.filter((p) => p.in !== "path");
+          const mergedPathParams = mergePathParamsWithMetadata(
+            extracted_params,
+            originalParams
+          );
+          const allParams = [...mergedPathParams, ...nonPathParams];
+
+          const updatedMetadata = { ...metadata };
+          if (allParams.length > 0) {
+            updatedMetadata.param = allParams;
+          }
 
           routes.push({
             method,
-            path: routePath,
+            path: normalized_path,
             description: description || "",
             middlewares,
-            metadata,
+            metadata: updatedMetadata,
           });
         }
       }

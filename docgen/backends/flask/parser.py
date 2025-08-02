@@ -2,6 +2,71 @@ import ast
 import os
 from pathlib import Path
 import re
+from docgen.backends.flask.path_utils import normalize_flask_path, merge_path_params_with_metadata
+
+
+def normalize_flask_path(path):
+    """Fallback normalization function"""
+    pattern = r'<(?:([a-zA-Z_][a-zA-Z0-9_]*):)?([a-zA-Z_][a-zA-Z0-9_]*)>'
+    extracted_params = []
+    
+    def replace_param(match):
+        param_type = match.group(1) or 'string'
+        param_name = match.group(2)
+        
+        type_mapping = {
+            'int': 'integer',
+            'float': 'number', 
+            'string': 'string',
+            'uuid': 'string',
+            'path': 'string'
+        }
+        
+        openapi_type = type_mapping.get(param_type, 'string')
+        
+        extracted_params.append({
+            'name': param_name,
+            'type': openapi_type,
+            'in': 'path',
+            'required': True,
+            'format': 'uuid' if param_type == 'uuid' else None
+        })
+        return f'{{{param_name}}}'
+    
+    normalized_path = re.sub(pattern, replace_param, path)
+    return normalized_path, extracted_params
+
+def merge_path_params_with_metadata(extracted_params, metadata_params):
+    """Fallback merge function"""
+    metadata_lookup = {}
+    for param in metadata_params:
+        if param.get('in') == 'path':
+            metadata_lookup[param['name']] = param
+    
+    merged_params = []
+    for extracted in extracted_params:
+        param_name = extracted['name']
+        if param_name in metadata_lookup:
+            metadata = metadata_lookup[param_name]
+            merged_param = {
+                'name': param_name,
+                'type': extracted.get('type', metadata.get('type', 'string')),
+                'in': 'path',
+                'required': True,
+                'description': metadata.get('description', f'{param_name} parameter')
+            }
+            if extracted.get('format'):
+                merged_param['format'] = extracted['format']
+            merged_params.append(merged_param)
+            del metadata_lookup[param_name]
+        else:
+            extracted['description'] = f'{param_name} parameter'
+            merged_params.append(extracted)
+    
+    for remaining_param in metadata_lookup.values():
+        merged_params.append(remaining_param)
+    
+    return merged_params
 
 def parse_param_tag(line):
     match = re.match(r"@param\s+{(\w+)}\s+(\w+)\.(\w+)(?:\.required)?\s*-\s*(.+)", line)
@@ -118,12 +183,30 @@ def extract_routes_from_ast(tree):
                 if keyword.arg == "methods" and isinstance(keyword.value, ast.List):
                     method_list = [elt.value for elt in keyword.value.elts if isinstance(elt, ast.Constant) and isinstance(elt.value, str)]
 
+            # Normalize path parameters
+            if route_path != "<unknown>":
+                normalized_path, extracted_params = normalize_flask_path(route_path)
+                
+                # Merge extracted path params with metadata params
+                original_params = metadata.get("param", [])
+                non_path_params = [p for p in original_params if p.get("in") != "path"]
+                merged_path_params = merge_path_params_with_metadata(extracted_params, original_params)
+                all_params = merged_path_params + non_path_params
+
+                # Update metadata with merged parameters
+                updated_metadata = metadata.copy()
+                if all_params:
+                    updated_metadata["param"] = all_params
+            else:
+                normalized_path = route_path
+                updated_metadata = metadata
+
             for method in method_list:
                 routes.append({
                     "method": method,
-                    "path": route_path,
+                    "path": normalized_path,
                     "middlewares": middlewares,
-                    "metadata": metadata,
+                    "metadata": updated_metadata,
                     "description": description,
                 })
 

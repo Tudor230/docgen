@@ -117,7 +117,7 @@ app.get("/user/:id", (req, res) => res.send("User"));
         (Path(tmpdir) / "app.js").write_text(source)
         routes = parser.parse_api(tmpdir)
 
-        assert routes[0]["path"] == "/user/:id"
+        assert routes[0]["path"] == "/user/{id}"
 
 def test_express_jsdoc_tags_and_summary():
     source = """
