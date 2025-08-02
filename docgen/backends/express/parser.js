@@ -8,39 +8,8 @@ const {
   parseParamTag,
   parseReturnsTag,
   extractCommentMetadata,
+  extractChainedRouteMetadata,
 } = require("./utils");
-
-const HTTP_METHODS = [
-  "get",
-  "post",
-  "put",
-  "delete",
-  "patch",
-  "head",
-  "options",
-];
-
-function isHttpMethod(name) {
-  return HTTP_METHODS.includes(name);
-}
-
-/** Pick the correct leading comment block for a method call. */
-function getCommentNodes({ methodPath, isFirstMethod, baseRoutePath }) {
-  // 1. Own leading comments
-  if (methodPath.node.leadingComments?.length)
-    return methodPath.node.leadingComments;
-  // 2. Leading comments of the handler function (last arg) – covers
-  //      router.get("/x",
-  //      /** docs */ (req,res)=>{})
-  const lastArg = methodPath.get("arguments").pop();
-  if (lastArg?.node?.leadingComments?.length)
-    return lastArg.node.leadingComments;
-  // 3. Leading comments of router.route("/x") – only for the *first* method
-  if (isFirstMethod && baseRoutePath.node.leadingComments?.length)
-    return baseRoutePath.node.leadingComments;
-  // Nothing found
-  return [];
-}
 
 function parseFile(filePath) {
   const code = fs.readFileSync(filePath, "utf-8");
@@ -51,6 +20,7 @@ function parseFile(filePath) {
   });
 
   const routes = [];
+  const processedChains = new Set(); // Track processed chains to avoid duplication
 
   traverse(ast, {
     CallExpression(path) {
@@ -110,55 +80,113 @@ function parseFile(filePath) {
           callee.property.name
         )
       ) {
-        // Walk up the chain to find the route call
-        let current = callee.object;
+        // Walk up the chain to find all methods and the base route
+        const chainMethods = [];
+        let currentCall = path.node;
         let routePath = "<unknown>";
+        let baseRouteCall = null;
 
-        while (current && current.type === "CallExpression") {
+        // Collect all methods in the chain
+        while (currentCall && currentCall.type === "CallExpression") {
           if (
-            current.callee.type === "MemberExpression" &&
-            current.callee.property.name === "route" &&
-            (current.callee.object.name === "router" ||
-              current.callee.object.name === "app")
+            currentCall.callee.type === "MemberExpression" &&
+            [
+              "get",
+              "post",
+              "put",
+              "delete",
+              "patch",
+              "head",
+              "options",
+            ].includes(currentCall.callee.property.name)
           ) {
-            const pathArg = current.arguments[0];
+            chainMethods.unshift({
+              method: currentCall.callee.property.name.toUpperCase(),
+              node: currentCall,
+              args: currentCall.arguments,
+            });
+          } else if (
+            currentCall.callee.type === "MemberExpression" &&
+            currentCall.callee.property.name === "route" &&
+            (currentCall.callee.object.name === "router" ||
+              currentCall.callee.object.name === "app")
+          ) {
+            const pathArg = currentCall.arguments[0];
             routePath = pathArg?.value || "<unknown>";
+            baseRouteCall = currentCall;
             break;
           }
-          current = current.callee.object;
+          currentCall = currentCall.callee.object;
         }
 
-        if (routePath !== "<unknown>") {
-          const method = callee.property.name.toUpperCase();
-          const args = path.node.arguments;
-          const middlewares = args
-            .slice(0, -1)
-            .map((arg) => arg.name || "<anonymous>");
+        if (
+          routePath !== "<unknown>" &&
+          baseRouteCall &&
+          chainMethods.length > 0
+        ) {
+          // Create a unique key for this chain based on route path and location
+          const chainKey = `${routePath}:${baseRouteCall.start}:${baseRouteCall.end}`;
 
-          const { description, metadata } = extractCommentMetadata(path);
-          const { normalized_path, extracted_params } =
-            normalizeExpressPath(routePath);
+          // Only process if we haven't seen this chain before
+          if (!processedChains.has(chainKey)) {
+            processedChains.add(chainKey);
 
-          const originalParams = metadata.param || [];
-          const nonPathParams = originalParams.filter((p) => p.in !== "path");
-          const mergedPathParams = mergePathParamsWithMetadata(
-            extracted_params,
-            originalParams
-          );
-          const allParams = [...mergedPathParams, ...nonPathParams];
+            // Find the ExpressionStatement that contains this chain
+            let expressionStatement = path.parent;
+            while (
+              expressionStatement &&
+              expressionStatement.type !== "ExpressionStatement"
+            ) {
+              expressionStatement = expressionStatement.parent;
+            }
 
-          const updatedMetadata = { ...metadata };
-          if (allParams.length > 0) {
-            updatedMetadata.param = allParams;
+            // Process each method in the chain
+            chainMethods.forEach((methodInfo, index) => {
+              const isFirstInChain = index === 0;
+              const method = methodInfo.method;
+              const args = methodInfo.args;
+              const middlewares = args
+                .slice(0, -1)
+                .map((arg) => arg.name || "<anonymous>");
+
+              // Get previous method for trailing comment access
+              const previousMethodInChain =
+                index > 0 ? chainMethods[index - 1].node : null;
+
+              const { description, metadata } = extractChainedRouteMetadata(
+                { node: methodInfo.node },
+                isFirstInChain,
+                expressionStatement || baseRouteCall,
+                previousMethodInChain
+              );
+
+              const { normalized_path, extracted_params } =
+                normalizeExpressPath(routePath);
+
+              const originalParams = metadata.param || [];
+              const nonPathParams = originalParams.filter(
+                (p) => p.in !== "path"
+              );
+              const mergedPathParams = mergePathParamsWithMetadata(
+                extracted_params,
+                originalParams
+              );
+              const allParams = [...mergedPathParams, ...nonPathParams];
+
+              const updatedMetadata = { ...metadata };
+              if (allParams.length > 0) {
+                updatedMetadata.param = allParams;
+              }
+
+              routes.push({
+                method,
+                path: normalized_path,
+                description: description || "",
+                middlewares,
+                metadata: updatedMetadata,
+              });
+            });
           }
-
-          routes.push({
-            method,
-            path: normalized_path,
-            description: description || "",
-            middlewares,
-            metadata: updatedMetadata,
-          });
         }
       }
     },

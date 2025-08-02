@@ -158,10 +158,94 @@ function extractCommentMetadata(path) {
   };
 }
 
+/** Extract comment metadata for chained routes with proper comment association */
+function extractChainedRouteMetadata(
+  methodPath,
+  isFirstInChain,
+  baseRouteCall,
+  previousMethodInChain
+) {
+  let comments = [];
+
+  if (isFirstInChain) {
+    // For the first method in the chain, use comments from the expression statement or base route call
+    if (baseRouteCall.type === "ExpressionStatement") {
+      comments = baseRouteCall.leadingComments || [];
+    } else {
+      comments = baseRouteCall.leadingComments || [];
+    }
+  } else {
+    // For subsequent methods, look for trailing comments of previous method
+    if (previousMethodInChain && previousMethodInChain.trailingComments) {
+      comments = previousMethodInChain.trailingComments;
+    } else {
+      // Fallback to own leading comments
+      comments = methodPath.node.leadingComments || [];
+    }
+  }
+
+  if (!comments || comments.length === 0) {
+    return { description: "", metadata: {} };
+  }
+
+  const last = comments[comments.length - 1];
+  const lines = last.value
+    .split("\n")
+    .map((line) => line.replace(/^\s*\*\s?/, "").trim())
+    .filter((line) => line.length > 0);
+
+  let descriptionLines = [];
+  let metadata = {};
+
+  for (const line of lines) {
+    if (line.startsWith("@")) {
+      const [tag, ...rest] = line.split(" ");
+      const key = tag.slice(1).trim();
+      const value = rest.join(" ").trim();
+
+      if (key === "param") {
+        const parsed = parseParamTag(line);
+        if (parsed) {
+          if (!metadata[key]) metadata[key] = [];
+          metadata[key].push(parsed);
+          continue;
+        }
+      }
+
+      if (key === "returns") {
+        const parsed = parseReturnsTag(line);
+        if (parsed) {
+          if (!metadata[key]) metadata[key] = [];
+          metadata[key].push(parsed);
+          continue;
+        }
+      }
+
+      if (metadata[key]) {
+        if (Array.isArray(metadata[key])) {
+          metadata[key].push(value);
+        } else {
+          metadata[key] = [metadata[key], value];
+        }
+      } else {
+        metadata[key] = value;
+      }
+    } else {
+      descriptionLines.push(line);
+    }
+  }
+
+  return {
+    description: descriptionLines.join(" "),
+    metadata,
+  };
+}
+
 module.exports = {
   normalizeExpressPath,
   mergePathParamsWithMetadata,
   parseParamTag,
   parseReturnsTag,
   extractCommentMetadata,
+  extractChainedRouteMetadata,
 };
