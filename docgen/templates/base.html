@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>API Documentation</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <header class="header">
+        <h1 class="title">API Documentation</h1>
+        <p class="subtitle">
+          Comprehensive API documentation for your backend services
+        </p>
+      </header>
+
+      <nav class="navigation">
+        <div class="nav-section">
+          <h3>Endpoints</h3>
+          <ul class="nav-list">
+            {% for route in routes %}
+            <li class="nav-item">
+              <a
+                href="#{{ route.method|lower }}-{{ route.path|replace('/', '-')|replace(':', '')|replace('{', '')|replace('}', '') }}"
+                class="nav-link"
+              >
+                <span class="method method-{{ route.method|lower }}"
+                  >{{ route.method }}</span
+                >
+                <span class="path">{{ route.path }}</span>
+              </a>
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </nav>
+
+      <main class="content">
+        {% for route in routes %}
+        <section
+          class="endpoint"
+          id="{{ route.method|lower }}-{{ route.path|replace('/', '-')|replace(':', '')|replace('{', '')|replace('}', '') }}"
+        >
+          <div class="endpoint-header">
+            <span class="method method-{{ route.method|lower }}"
+              >{{ route.method }}</span
+            >
+            <code class="endpoint-path">{{ route.path }}</code>
+          </div>
+
+          {% if route.metadata.summary %}
+          <div class="summary">
+            <h3>Summary</h3>
+            <p>{{ route.metadata.summary }}</p>
+          </div>
+          {% endif %} {% if route.description %}
+          <div class="description">
+            <h3>Description</h3>
+            <p>{{ route.description }}</p>
+          </div>
+          {% endif %} {% if route.metadata.description and
+          route.metadata.description != route.description %}
+          <div class="metadata-description">
+            <h3>Details</h3>
+            <p>{{ route.metadata.description }}</p>
+          </div>
+          {% endif %} {% if route.metadata.tags or route.metadata.tag %}
+          <div class="tags">
+            <h3>Tags</h3>
+            <div class="tag-list">
+              {%- set all_tags = [] -%} {%- if route.metadata.tags -%} {%- if
+              route.metadata.tags is string -%} {%- set tag_list =
+              route.metadata.tags.split(',') -%} {%- for tag in tag_list -%} {%-
+              set _ = all_tags.append(tag.strip()) -%} {%- endfor -%} {%- elif
+              route.metadata.tags is iterable -%} {%- for tag in
+              route.metadata.tags -%} {%- if tag is string and ',' in tag -%}
+              {%- set tag_list = tag.split(',') -%} {%- for subtag in tag_list
+              -%} {%- set _ = all_tags.append(subtag.strip()) -%} {%- endfor -%}
+              {%- else -%} {%- set _ = all_tags.append(tag.strip()) -%} {%-
+              endif -%} {%- endfor -%} {%- else -%} {%- set _ =
+              all_tags.append(route.metadata.tags) -%} {%- endif -%} {%- endif
+              -%} {%- if route.metadata.tag -%} {%- if route.metadata.tag is
+              string -%} {%- set _ = all_tags.append(route.metadata.tag) -%} {%-
+              elif route.metadata.tag is iterable -%} {%- for tag in
+              route.metadata.tag -%} {%- set _ = all_tags.append(tag) -%} {%-
+              endfor -%} {%- endif -%} {%- endif -%} {% for tag in all_tags %}
+              <span class="tag">{{ tag }}</span>
+              {% endfor %}
+            </div>
+          </div>
+          {% endif %}
+
+          <div class="middlewares">
+            <h3>Middlewares</h3>
+            <p>
+              {{ route.middlewares | join(', ') if route.middlewares else 'None'
+              }}
+            </p>
+          </div>
+
+          {% if route.metadata.param %}
+          <div class="parameters">
+            <h3>Parameters</h3>
+            <div class="parameter-list">
+              {% for param in route.metadata.param %}
+              <div class="parameter">
+                <div class="parameter-header">
+                  <span class="parameter-name">{{ param.name }}</span>
+                  <span class="parameter-type">{{ param.type }}</span>
+                  {% if param.required %}
+                  <span class="required">required</span>
+                  {% endif %}
+                </div>
+                <div class="parameter-description">{{ param.description }}</div>
+                <div class="parameter-location">
+                  Location: <code>{{ param.in }}</code>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+          {% endif %} {% if route.metadata.returns %}
+          <div class="returns">
+            <h3>Returns</h3>
+            <div class="return-list">
+              {% for return in route.metadata.returns %}
+              <div class="return-item">
+                <div class="return-header">
+                  <span class="status-code">{{ return.statusCode }}</span>
+                  <span class="return-type">{{ return.type }}</span>
+                </div>
+                <div class="return-description">{{ return.description }}</div>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+          {% endif %} {% if route.metadata %} {% set special_fields =
+          ['summary', 'description', 'tags', 'tag', 'param', 'returns'] %} {%
+          for key, value in route.metadata.items() %} {% if key not in
+          special_fields %}
+          <div class="metadata-field">
+            <h3>{{ key.title() }}</h3>
+            {% if value is string %}
+            <p>{{ value }}</p>
+            {% elif value is iterable %}
+            <ul>
+              {% for item in value %}
+              <li>{{ item }}</li>
+              {% endfor %}
+            </ul>
+            {% else %}
+            <p>{{ value }}</p>
+            {% endif %}
+          </div>
+          {% endif %} {% endfor %} {% endif %}
+        </section>
+        {% endfor %}
+      </main>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>

@@ -1,0 +1,1402 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>API Documentation</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <header class="header">
+        <h1 class="title">API Documentation</h1>
+        <p class="subtitle">
+          Comprehensive API documentation for your backend services
+        </p>
+      </header>
+
+      <nav class="navigation">
+        <div class="nav-section">
+          <h3>Endpoints</h3>
+          <ul class="nav-list">
+            
+            <li class="nav-item">
+              <a
+                href="#get--users"
+                class="nav-link"
+              >
+                <span class="method method-get"
+                  >GET</span
+                >
+                <span class="path">/users</span>
+              </a>
+            </li>
+            
+            <li class="nav-item">
+              <a
+                href="#get--users-id"
+                class="nav-link"
+              >
+                <span class="method method-get"
+                  >GET</span
+                >
+                <span class="path">/users/{id}</span>
+              </a>
+            </li>
+            
+            <li class="nav-item">
+              <a
+                href="#post--users"
+                class="nav-link"
+              >
+                <span class="method method-post"
+                  >POST</span
+                >
+                <span class="path">/users</span>
+              </a>
+            </li>
+            
+            <li class="nav-item">
+              <a
+                href="#put--users-id"
+                class="nav-link"
+              >
+                <span class="method method-put"
+                  >PUT</span
+                >
+                <span class="path">/users/{id}</span>
+              </a>
+            </li>
+            
+            <li class="nav-item">
+              <a
+                href="#delete--orders-id"
+                class="nav-link"
+              >
+                <span class="method method-delete"
+                  >DELETE</span
+                >
+                <span class="path">/orders/{id}</span>
+              </a>
+            </li>
+            
+            <li class="nav-item">
+              <a
+                href="#get--health"
+                class="nav-link"
+              >
+                <span class="method method-get"
+                  >GET</span
+                >
+                <span class="path">/health</span>
+              </a>
+            </li>
+            
+            <li class="nav-item">
+              <a
+                href="#get--products"
+                class="nav-link"
+              >
+                <span class="method method-get"
+                  >GET</span
+                >
+                <span class="path">/products</span>
+              </a>
+            </li>
+            
+            <li class="nav-item">
+              <a
+                href="#post--products"
+                class="nav-link"
+              >
+                <span class="method method-post"
+                  >POST</span
+                >
+                <span class="path">/products</span>
+              </a>
+            </li>
+            
+            <li class="nav-item">
+              <a
+                href="#post--upload"
+                class="nav-link"
+              >
+                <span class="method method-post"
+                  >POST</span
+                >
+                <span class="path">/upload</span>
+              </a>
+            </li>
+            
+          </ul>
+        </div>
+      </nav>
+
+      <main class="content">
+        
+                     <section
+               class="endpoint"
+               id="get--users"
+             >
+          <div class="endpoint-header">
+            <span class="method method-get"
+              >GET</span
+            >
+            <code class="endpoint-path">/users</code>
+          </div>
+
+           
+          <div class="description">
+            <h3>Description</h3>
+            <p>Get all users from the system</p>
+          </div>
+            
+          <div class="tags">
+            <h3>Tags</h3>
+            <div class="tag-list">
+              <span class="tag">Users</span>
+              
+              <span class="tag">Admin</span>
+              
+            </div>
+          </div>
+          
+
+          <div class="middlewares">
+            <h3>Middlewares</h3>
+            <p>
+              None
+            </p>
+          </div>
+
+          
+          <div class="parameters">
+            <h3>Parameters</h3>
+            <div class="parameter-list">
+              
+              <div class="parameter">
+                <div class="parameter-header">
+                  <span class="parameter-name">page</span>
+                  <span class="parameter-type">number</span>
+                  
+                </div>
+                <div class="parameter-description">Page number for pagination</div>
+                <div class="parameter-location">
+                  Location: <code>query</code>
+                </div>
+              </div>
+              
+              <div class="parameter">
+                <div class="parameter-header">
+                  <span class="parameter-name">limit</span>
+                  <span class="parameter-type">number</span>
+                  
+                </div>
+                <div class="parameter-description">Number of users per page</div>
+                <div class="parameter-location">
+                  Location: <code>query</code>
+                </div>
+              </div>
+              
+            </div>
+          </div>
+           
+          <div class="returns">
+            <h3>Returns</h3>
+            <div class="return-list">
+              
+              <div class="return-item">
+                <div class="return-header">
+                  <span class="status-code">200</span>
+                  <span class="return-type">object</span>
+                </div>
+                <div class="return-description">Success response with users array</div>
+              </div>
+              
+              <div class="return-item">
+                <div class="return-header">
+                  <span class="status-code">400</span>
+                  <span class="return-type">object</span>
+                </div>
+                <div class="return-description">Invalid parameters</div>
+              </div>
+              
+            </div>
+          </div>
+                    
+          <div class="metadata-field">
+            <h3>Example</h3>
+            
+            <p>GET /users?page=1&limit=10</p>
+            
+          </div>
+            
+          <div class="metadata-field">
+            <h3>Author</h3>
+            
+            <p>John Doe</p>
+            
+          </div>
+            
+          <div class="metadata-field">
+            <h3>Since</h3>
+            
+            <p>v1.0.0</p>
+            
+          </div>
+            
+        </section>
+        
+                     <section
+               class="endpoint"
+               id="get--users-id"
+             >
+          <div class="endpoint-header">
+            <span class="method method-get"
+              >GET</span
+            >
+            <code class="endpoint-path">/users/{id}</code>
+          </div>
+
+          
+          <div class="summary">
+            <h3>Summary</h3>
+            <p>Get current user profile</p>
+          </div>
+            
+          <div class="metadata-description">
+            <h3>Details</h3>
+            <p>Returns the currently authenticated user's detailed profile information including preferences and settings.</p>
+          </div>
+           
+          <div class="tags">
+            <h3>Tags</h3>
+            <div class="tag-list">
+              <span class="tag">Users</span>
+              
+            </div>
+          </div>
+          
+
+          <div class="middlewares">
+            <h3>Middlewares</h3>
+            <p>
+              None
+            </p>
+          </div>
+
+          
+          <div class="parameters">
+            <h3>Parameters</h3>
+            <div class="parameter-list">
+              
+              <div class="parameter">
+                <div class="parameter-header">
+                  <span class="parameter-name">id</span>
+                  <span class="parameter-type">string</span>
+                  
+                  <span class="required">required</span>
+                  
+                </div>
+                <div class="parameter-description">User ID</div>
+                <div class="parameter-location">
+                  Location: <code>path</code>
+                </div>
+              </div>
+              
+              <div class="parameter">
+                <div class="parameter-header">
+                  <span class="parameter-name">Authorization</span>
+                  <span class="parameter-type">string</span>
+                  
+                  <span class="required">required</span>
+                  
+                </div>
+                <div class="parameter-description">Bearer token</div>
+                <div class="parameter-location">
+                  Location: <code>header</code>
+                </div>
+              </div>
+              
+            </div>
+          </div>
+           
+          <div class="returns">
+            <h3>Returns</h3>
+            <div class="return-list">
+              
+              <div class="return-item">
+                <div class="return-header">
+                  <span class="status-code">200</span>
+                  <span class="return-type">object</span>
+                </div>
+                <div class="return-description">User profile object</div>
+              </div>
+              
+              <div class="return-item">
+                <div class="return-header">
+                  <span class="status-code">404</span>
+                  <span class="return-type">object</span>
+                </div>
+                <div class="return-description">User not found</div>
+              </div>
+              
+            </div>
+          </div>
+                        
+          <div class="metadata-field">
+            <h3>Example</h3>
+            
+            <ul>
+              
+              <li>GET /users/123</li>
+              
+              <li>Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...</li>
+              
+            </ul>
+            
+          </div>
+            
+          <div class="metadata-field">
+            <h3>Security</h3>
+            
+            <p>Bearer</p>
+            
+          </div>
+            
+          <div class="metadata-field">
+            <h3>Since</h3>
+            
+            <p>v1.2.0</p>
+            
+          </div>
+            
+        </section>
+        
+                     <section
+               class="endpoint"
+               id="post--users"
+             >
+          <div class="endpoint-header">
+            <span class="method method-post"
+              >POST</span
+            >
+            <code class="endpoint-path">/users</code>
+          </div>
+
+           
+          <div class="description">
+            <h3>Description</h3>
+            <p>Create a new user account</p>
+          </div>
+            
+          <div class="tags">
+            <h3>Tags</h3>
+            <div class="tag-list">
+              <span class="tag">Users</span>
+              
+              <span class="tag">Authentication</span>
+              
+            </div>
+          </div>
+          
+
+          <div class="middlewares">
+            <h3>Middlewares</h3>
+            <p>
+              None
+            </p>
+          </div>
+
+          
+          <div class="parameters">
+            <h3>Parameters</h3>
+            <div class="parameter-list">
+              
+              <div class="parameter">
+                <div class="parameter-header">
+                  <span class="parameter-name">email</span>
+                  <span class="parameter-type">string</span>
+                  
+                  <span class="required">required</span>
+                  
+                </div>
+                <div class="parameter-description">User email address</div>
+                <div class="parameter-location">
+                  Location: <code>body</code>
+                </div>
+              </div>
+              
+              <div class="parameter">
+                <div class="parameter-header">
+                  <span class="parameter-name">password</span>
+                  <span class="parameter-type">string</span>
+                  
+                  <span class="required">required</span>
+                  
+                </div>
+                <div class="parameter-description">User password (min 8 characters)</div>
+                <div class="parameter-location">
+                  Location: <code>body</code>
+                </div>
+              </div>
+              
+              <div class="parameter">
+                <div class="parameter-header">
+                  <span class="parameter-name">name</span>
+                  <span class="parameter-type">string</span>
+                  
+                  <span class="required">required</span>
+                  
+                </div>
+                <div class="parameter-description">Full name</div>
+                <div class="parameter-location">
+                  Location: <code>body</code>
+                </div>
+              </div>
+              
+              <div class="parameter">
+                <div class="parameter-header">
+                  <span class="parameter-name">role</span>
+                  <span class="parameter-type">string</span>
+                  
+                </div>
+                <div class="parameter-description">User role (default: user)</div>
+                <div class="parameter-location">
+                  Location: <code>body</code>
+                </div>
+              </div>
+              
+            </div>
+          </div>
+           
+          <div class="returns">
+            <h3>Returns</h3>
+            <div class="return-list">
+              
+              <div class="return-item">
+                <div class="return-header">
+                  <span class="status-code">201</span>
+                  <span class="return-type">object</span>
+                </div>
+                <div class="return-description">User created successfully</div>
+              </div>
+              
+              <div class="return-item">
+                <div class="return-header">
+                  <span class="status-code">400</span>
+                  <span class="return-type">object</span>
+                </div>
+                <div class="return-description">Validation error</div>
+              </div>
+              
+              <div class="return-item">
+                <div class="return-header">
+                  <span class="status-code">409</span>
+                  <span class="return-type">object</span>
+                </div>
+                <div class="return-description">Email already exists</div>
+              </div>
+              
+            </div>
+          </div>
+                    
+          <div class="metadata-field">
+            <h3>Example</h3>
+            
+            <ul>
+              
+              <li>POST /users</li>
+              
+              <li>{"email": "user@example.com", "password": "securepass", "name": "John Doe"}</li>
+              
+            </ul>
+            
+          </div>
+            
+          <div class="metadata-field">
+            <h3>Throws</h3>
+            
+            <ul>
+              
+              <li>{ValidationError} When email format is invalid</li>
+              
+              <li>{ConflictError} When email already exists</li>
+              
+            </ul>
+            
+          </div>
+            
+          <div class="metadata-field">
+            <h3>Author</h3>
+            
+            <p>Jane Smith</p>
+            
+          </div>
+            
+          <div class="metadata-field">
+            <h3>Since</h3>
+            
+            <p>v1.0.0</p>
+            
+          </div>
+            
+          <div class="metadata-field">
+            <h3>Version</h3>
+            
+            <p>1.1.0</p>
+            
+          </div>
+            
+        </section>
+        
+                     <section
+               class="endpoint"
+               id="put--users-id"
+             >
+          <div class="endpoint-header">
+            <span class="method method-put"
+              >PUT</span
+            >
+            <code class="endpoint-path">/users/{id}</code>
+          </div>
+
+          
+          <div class="summary">
+            <h3>Summary</h3>
+            <p>Update user details</p>
+          </div>
+           
+          <div class="description">
+            <h3>Description</h3>
+            <p>Update user profile information</p>
+          </div>
+            
+          <div class="tags">
+            <h3>Tags</h3>
+            <div class="tag-list">
+              <span class="tag">Users</span>
+              
+              <span class="tag">Profile</span>
+              
+              <span class="tag">Admin</span>
+              
+            </div>
+          </div>
+          
+
+          <div class="middlewares">
+            <h3>Middlewares</h3>
+            <p>
+              None
+            </p>
+          </div>
+
+          
+          <div class="parameters">
+            <h3>Parameters</h3>
+            <div class="parameter-list">
+              
+              <div class="parameter">
+                <div class="parameter-header">
+                  <span class="parameter-name">id</span>
+                  <span class="parameter-type">string</span>
+                  
+                  <span class="required">required</span>
+                  
+                </div>
+                <div class="parameter-description">User ID to update</div>
+                <div class="parameter-location">
+                  Location: <code>path</code>
+                </div>
+              </div>
+              
+              <div class="parameter">
+                <div class="parameter-header">
+                  <span class="parameter-name">name</span>
+                  <span class="parameter-type">string</span>
+                  
+                </div>
+                <div class="parameter-description">Updated name</div>
+                <div class="parameter-location">
+                  Location: <code>body</code>
+                </div>
+              </div>
+              
+              <div class="parameter">
+                <div class="parameter-header">
+                  <span class="parameter-name">email</span>
+                  <span class="parameter-type">string</span>
+                  
+                </div>
+                <div class="parameter-description">Updated email</div>
+                <div class="parameter-location">
+                  Location: <code>body</code>
+                </div>
+              </div>
+              
+              <div class="parameter">
+                <div class="parameter-header">
+                  <span class="parameter-name">preferences</span>
+                  <span class="parameter-type">object</span>
+                  
+                </div>
+                <div class="parameter-description">User preferences object</div>
+                <div class="parameter-location">
+                  Location: <code>body</code>
+                </div>
+              </div>
+              
+            </div>
+          </div>
+           
+          <div class="returns">
+            <h3>Returns</h3>
+            <div class="return-list">
+              
+              <div class="return-item">
+                <div class="return-header">
+                  <span class="status-code">200</span>
+                  <span class="return-type">object</span>
+                </div>
+                <div class="return-description">User updated successfully</div>
+              </div>
+              
+              <div class="return-item">
+                <div class="return-header">
+                  <span class="status-code">403</span>
+                  <span class="return-type">object</span>
+                </div>
+                <div class="return-description">Insufficient permissions</div>
+              </div>
+              
+              <div class="return-item">
+                <div class="return-header">
+                  <span class="status-code">404</span>
+                  <span class="return-type">object</span>
+                </div>
+                <div class="return-description">User not found</div>
+              </div>
+              
+            </div>
+          </div>
+                      
+          <div class="metadata-field">
+            <h3>Example</h3>
+            
+            <ul>
+              
+              <li>PUT /users/123</li>
+              
+              <li>{"name": "John Updated", "preferences": {"theme": "dark"}}</li>
+              
+            </ul>
+            
+          </div>
+            
+          <div class="metadata-field">
+            <h3>Security</h3>
+            
+            <p>AdminOnly</p>
+            
+          </div>
+            
+          <div class="metadata-field">
+            <h3>Ratelimit</h3>
+            
+            <p>10 requests per minute</p>
+            
+          </div>
+            
+          <div class="metadata-field">
+            <h3>Since</h3>
+            
+            <p>v1.1.0</p>
+            
+          </div>
+            
+        </section>
+        
+                     <section
+               class="endpoint"
+               id="delete--orders-id"
+             >
+          <div class="endpoint-header">
+            <span class="method method-delete"
+              >DELETE</span
+            >
+            <code class="endpoint-path">/orders/{id}</code>
+          </div>
+
+          
+          <div class="summary">
+            <h3>Summary</h3>
+            <p>Delete order permanently</p>
+          </div>
+            
+          <div class="metadata-description">
+            <h3>Details</h3>
+            <p>Permanently removes an order from the system. This action cannot be undone and will trigger audit logging.</p>
+          </div>
+           
+          <div class="tags">
+            <h3>Tags</h3>
+            <div class="tag-list">
+              <span class="tag">Orders</span>
+              
+              <span class="tag">Admin</span>
+              
+              <span class="tag">Audit</span>
+              
+            </div>
+          </div>
+          
+
+          <div class="middlewares">
+            <h3>Middlewares</h3>
+            <p>
+              None
+            </p>
+          </div>
+
+          
+          <div class="parameters">
+            <h3>Parameters</h3>
+            <div class="parameter-list">
+              
+              <div class="parameter">
+                <div class="parameter-header">
+                  <span class="parameter-name">id</span>
+                  <span class="parameter-type">string</span>
+                  
+                  <span class="required">required</span>
+                  
+                </div>
+                <div class="parameter-description">Order ID to delete</div>
+                <div class="parameter-location">
+                  Location: <code>path</code>
+                </div>
+              </div>
+              
+              <div class="parameter">
+                <div class="parameter-header">
+                  <span class="parameter-name">reason</span>
+                  <span class="parameter-type">string</span>
+                  
+                </div>
+                <div class="parameter-description">Reason for deletion</div>
+                <div class="parameter-location">
+                  Location: <code>body</code>
+                </div>
+              </div>
+              
+            </div>
+          </div>
+           
+          <div class="returns">
+            <h3>Returns</h3>
+            <div class="return-list">
+              
+              <div class="return-item">
+                <div class="return-header">
+                  <span class="status-code">200</span>
+                  <span class="return-type">object</span>
+                </div>
+                <div class="return-description">Order deleted successfully</div>
+              </div>
+              
+              <div class="return-item">
+                <div class="return-header">
+                  <span class="status-code">404</span>
+                  <span class="return-type">object</span>
+                </div>
+                <div class="return-description">Order not found</div>
+              </div>
+              
+            </div>
+          </div>
+                        
+          <div class="metadata-field">
+            <h3>Example</h3>
+            
+            <ul>
+              
+              <li>DELETE /orders/ord_123</li>
+              
+              <li>{"reason": "Customer requested cancellation"}</li>
+              
+            </ul>
+            
+          </div>
+            
+          <div class="metadata-field">
+            <h3>Deprecated</h3>
+            
+            <p>Use PATCH /orders/:id/cancel instead</p>
+            
+          </div>
+            
+          <div class="metadata-field">
+            <h3>Warning</h3>
+            
+            <p>This is a destructive operation</p>
+            
+          </div>
+            
+          <div class="metadata-field">
+            <h3>Audit</h3>
+            
+            <p>Required - logs deletion with user info</p>
+            
+          </div>
+            
+          <div class="metadata-field">
+            <h3>Author</h3>
+            
+            <p>Admin Team</p>
+            
+          </div>
+            
+          <div class="metadata-field">
+            <h3>Since</h3>
+            
+            <p>v2.0.0</p>
+            
+          </div>
+            
+          <div class="metadata-field">
+            <h3>Todo</h3>
+            
+            <p>Add soft delete option</p>
+            
+          </div>
+            
+        </section>
+        
+                     <section
+               class="endpoint"
+               id="get--health"
+             >
+          <div class="endpoint-header">
+            <span class="method method-get"
+              >GET</span
+            >
+            <code class="endpoint-path">/health</code>
+          </div>
+
+           
+          <div class="description">
+            <h3>Description</h3>
+            <p>Get system health and status</p>
+          </div>
+            
+          <div class="tags">
+            <h3>Tags</h3>
+            <div class="tag-list">
+              <span class="tag">System</span>
+              
+              <span class="tag">Monitoring</span>
+              
+              <span class="tag">Health</span>
+              
+            </div>
+          </div>
+          
+
+          <div class="middlewares">
+            <h3>Middlewares</h3>
+            <p>
+              None
+            </p>
+          </div>
+
+           
+          <div class="returns">
+            <h3>Returns</h3>
+            <div class="return-list">
+              
+              <div class="return-item">
+                <div class="return-header">
+                  <span class="status-code">200</span>
+                  <span class="return-type">object</span>
+                </div>
+                <div class="return-description">System status</div>
+              </div>
+              
+              <div class="return-item">
+                <div class="return-header">
+                  <span class="status-code">503</span>
+                  <span class="return-type">object</span>
+                </div>
+                <div class="return-description">Service unavailable</div>
+              </div>
+              
+            </div>
+          </div>
+                  
+          <div class="metadata-field">
+            <h3>Example</h3>
+            
+            <ul>
+              
+              <li>GET /health</li>
+              
+              <li>Response: {"status": "OK", "uptime": 12345, "version": "1.0.0"}</li>
+              
+            </ul>
+            
+          </div>
+            
+          <div class="metadata-field">
+            <h3>Public</h3>
+            
+            <p>No authentication required</p>
+            
+          </div>
+            
+          <div class="metadata-field">
+            <h3>Cache</h3>
+            
+            <p>30 seconds</p>
+            
+          </div>
+            
+          <div class="metadata-field">
+            <h3>Monitoring</h3>
+            
+            <p>Uptime check endpoint</p>
+            
+          </div>
+            
+          <div class="metadata-field">
+            <h3>Sla</h3>
+            
+            <p>99.9% availability</p>
+            
+          </div>
+            
+        </section>
+        
+                     <section
+               class="endpoint"
+               id="get--products"
+             >
+          <div class="endpoint-header">
+            <span class="method method-get"
+              >GET</span
+            >
+            <code class="endpoint-path">/products</code>
+          </div>
+
+          
+          <div class="summary">
+            <h3>Summary</h3>
+            <p>Manage product catalog</p>
+          </div>
+           
+          <div class="description">
+            <h3>Description</h3>
+            <p>Product management endpoints</p>
+          </div>
+           
+          <div class="metadata-description">
+            <h3>Details</h3>
+            <p>Complete CRUD operations for product management including inventory tracking and catalog updates.</p>
+          </div>
+           
+          <div class="tags">
+            <h3>Tags</h3>
+            <div class="tag-list">
+              <span class="tag">Products</span>
+              
+              <span class="tag">Inventory</span>
+              
+              <span class="tag">Catalog</span>
+              
+            </div>
+          </div>
+          
+
+          <div class="middlewares">
+            <h3>Middlewares</h3>
+            <p>
+              None
+            </p>
+          </div>
+
+          
+          <div class="parameters">
+            <h3>Parameters</h3>
+            <div class="parameter-list">
+              
+              <div class="parameter">
+                <div class="parameter-header">
+                  <span class="parameter-name">category</span>
+                  <span class="parameter-type">string</span>
+                  
+                </div>
+                <div class="parameter-description">Filter by product category</div>
+                <div class="parameter-location">
+                  Location: <code>query</code>
+                </div>
+              </div>
+              
+              <div class="parameter">
+                <div class="parameter-header">
+                  <span class="parameter-name">active</span>
+                  <span class="parameter-type">boolean</span>
+                  
+                </div>
+                <div class="parameter-description">Filter by active status</div>
+                <div class="parameter-location">
+                  Location: <code>query</code>
+                </div>
+              </div>
+              
+            </div>
+          </div>
+           
+          <div class="returns">
+            <h3>Returns</h3>
+            <div class="return-list">
+              
+              <div class="return-item">
+                <div class="return-header">
+                  <span class="status-code">200</span>
+                  <span class="return-type">array</span>
+                </div>
+                <div class="return-description">Array of products</div>
+              </div>
+              
+            </div>
+          </div>
+                        
+          <div class="metadata-field">
+            <h3>Example</h3>
+            
+            <p>GET /api/products?category=electronics&active=true</p>
+            
+          </div>
+            
+          <div class="metadata-field">
+            <h3>Cache</h3>
+            
+            <p>5 minutes</p>
+            
+          </div>
+            
+          <div class="metadata-field">
+            <h3>Ratelimit</h3>
+            
+            <p>100 requests per minute</p>
+            
+          </div>
+            
+          <div class="metadata-field">
+            <h3>Version</h3>
+            
+            <p>2.1.0</p>
+            
+          </div>
+            
+          <div class="metadata-field">
+            <h3>See</h3>
+            
+            <p>/api/categories for available categories</p>
+            
+          </div>
+            
+        </section>
+        
+                     <section
+               class="endpoint"
+               id="post--products"
+             >
+          <div class="endpoint-header">
+            <span class="method method-post"
+              >POST</span
+            >
+            <code class="endpoint-path">/products</code>
+          </div>
+
+           
+          <div class="description">
+            <h3>Description</h3>
+            <p>Create new product</p>
+          </div>
+            
+          <div class="tags">
+            <h3>Tags</h3>
+            <div class="tag-list">
+              <span class="tag">Products</span>
+              
+              <span class="tag">Admin</span>
+              
+            </div>
+          </div>
+          
+
+          <div class="middlewares">
+            <h3>Middlewares</h3>
+            <p>
+              None
+            </p>
+          </div>
+
+          
+          <div class="parameters">
+            <h3>Parameters</h3>
+            <div class="parameter-list">
+              
+              <div class="parameter">
+                <div class="parameter-header">
+                  <span class="parameter-name">name</span>
+                  <span class="parameter-type">string</span>
+                  
+                  <span class="required">required</span>
+                  
+                </div>
+                <div class="parameter-description">Product name</div>
+                <div class="parameter-location">
+                  Location: <code>body</code>
+                </div>
+              </div>
+              
+              <div class="parameter">
+                <div class="parameter-header">
+                  <span class="parameter-name">price</span>
+                  <span class="parameter-type">number</span>
+                  
+                  <span class="required">required</span>
+                  
+                </div>
+                <div class="parameter-description">Product price</div>
+                <div class="parameter-location">
+                  Location: <code>body</code>
+                </div>
+              </div>
+              
+              <div class="parameter">
+                <div class="parameter-header">
+                  <span class="parameter-name">category</span>
+                  <span class="parameter-type">string</span>
+                  
+                  <span class="required">required</span>
+                  
+                </div>
+                <div class="parameter-description">Product category</div>
+                <div class="parameter-location">
+                  Location: <code>body</code>
+                </div>
+              </div>
+              
+              <div class="parameter">
+                <div class="parameter-header">
+                  <span class="parameter-name">description</span>
+                  <span class="parameter-type">string</span>
+                  
+                </div>
+                <div class="parameter-description">Product description</div>
+                <div class="parameter-location">
+                  Location: <code>body</code>
+                </div>
+              </div>
+              
+            </div>
+          </div>
+           
+          <div class="returns">
+            <h3>Returns</h3>
+            <div class="return-list">
+              
+              <div class="return-item">
+                <div class="return-header">
+                  <span class="status-code">201</span>
+                  <span class="return-type">object</span>
+                </div>
+                <div class="return-description">Product created</div>
+              </div>
+              
+            </div>
+          </div>
+                    
+          <div class="metadata-field">
+            <h3>Example</h3>
+            
+            <ul>
+              
+              <li>POST /api/products</li>
+              
+              <li>{"name": "Widget", "price": 29.99, "category": "gadgets"}</li>
+              
+            </ul>
+            
+          </div>
+            
+          <div class="metadata-field">
+            <h3>Validation</h3>
+            
+            <p>Requires admin role</p>
+            
+          </div>
+            
+          <div class="metadata-field">
+            <h3>Audit</h3>
+            
+            <p>Product creation logged</p>
+            
+          </div>
+            
+        </section>
+        
+                     <section
+               class="endpoint"
+               id="post--upload"
+             >
+          <div class="endpoint-header">
+            <span class="method method-post"
+              >POST</span
+            >
+            <code class="endpoint-path">/upload</code>
+          </div>
+
+          
+          <div class="summary">
+            <h3>Summary</h3>
+            <p>Upload user files</p>
+          </div>
+           
+          <div class="description">
+            <h3>Description</h3>
+            <p>File upload endpoint</p>
+          </div>
+            
+          <div class="tags">
+            <h3>Tags</h3>
+            <div class="tag-list">
+              <span class="tag">Files</span>
+              
+              <span class="tag">Upload</span>
+              
+            </div>
+          </div>
+          
+
+          <div class="middlewares">
+            <h3>Middlewares</h3>
+            <p>
+              None
+            </p>
+          </div>
+
+          
+          <div class="parameters">
+            <h3>Parameters</h3>
+            <div class="parameter-list">
+              
+              <div class="parameter">
+                <div class="parameter-header">
+                  <span class="parameter-name">file</span>
+                  <span class="parameter-type">file</span>
+                  
+                  <span class="required">required</span>
+                  
+                </div>
+                <div class="parameter-description">File to upload</div>
+                <div class="parameter-location">
+                  Location: <code>formData</code>
+                </div>
+              </div>
+              
+              <div class="parameter">
+                <div class="parameter-header">
+                  <span class="parameter-name">category</span>
+                  <span class="parameter-type">string</span>
+                  
+                </div>
+                <div class="parameter-description">File category</div>
+                <div class="parameter-location">
+                  Location: <code>formData</code>
+                </div>
+              </div>
+              
+            </div>
+          </div>
+           
+          <div class="returns">
+            <h3>Returns</h3>
+            <div class="return-list">
+              
+              <div class="return-item">
+                <div class="return-header">
+                  <span class="status-code">200</span>
+                  <span class="return-type">object</span>
+                </div>
+                <div class="return-description">Upload successful</div>
+              </div>
+              
+              <div class="return-item">
+                <div class="return-header">
+                  <span class="status-code">413</span>
+                  <span class="return-type">object</span>
+                </div>
+                <div class="return-description">File too large</div>
+              </div>
+              
+            </div>
+          </div>
+                      
+          <div class="metadata-field">
+            <h3>Example</h3>
+            
+            <p>POST /upload</p>
+            
+          </div>
+            
+          <div class="metadata-field">
+            <h3>Maxsize</h3>
+            
+            <p>10MB</p>
+            
+          </div>
+            
+          <div class="metadata-field">
+            <h3>Formats</h3>
+            
+            <p>jpg, png, pdf, docx</p>
+            
+          </div>
+            
+          <div class="metadata-field">
+            <h3>Storage</h3>
+            
+            <p>AWS S3</p>
+            
+          </div>
+            
+          <div class="metadata-field">
+            <h3>Virus-Scan</h3>
+            
+            <p>Enabled</p>
+            
+          </div>
+            
+          <div class="metadata-field">
+            <h3>Retention</h3>
+            
+            <p>7 years</p>
+            
+          </div>
+            
+        </section>
+        
+      </main>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
